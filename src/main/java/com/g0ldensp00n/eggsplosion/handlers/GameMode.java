@@ -1,3 +1,4 @@
+/*
 package com.g0ldensp00n.eggsplosion.handlers;
 
 import org.bukkit.Bukkit;
@@ -14,3 +15,4 @@ public class GameMode {
 
 
 }
+*/
