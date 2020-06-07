@@ -1,0 +1,34 @@
+plugins {
+    id "ru.endlesscode.bukkitgradle" version "0.8.2"
+}
+ 
+// Project information
+group "com.g0ldensp00n"
+description "My first Bukkit plugin with Gradle"
+version "4.0"
+
+// Override default configurations
+bukkit {
+    // Version of API (if you will not set this property, will be used latest available)
+    version = "1.15.2"
+ 
+    // Attributes for plugin.yml
+    meta {
+        name = "EggSplosion"
+        description = "EggSplosion Game Mode"
+        main = "com.g0ldensp00n.eggsplosion.EggSplosion"
+        version = "4.0"
+        authors = ["G0ldenSp00n"]
+    }
+
+    run {
+      eula = true
+      debug = true
+    }
+}
+
+// Let's add needed API to project
+dependencies {
+    compileOnly bukkit() 
+    // see section 'Dependencies' for more info
+}
