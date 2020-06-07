@@ -7,11 +7,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,19 +21,15 @@ import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 
 public class ExplosionRegen implements Listener {
 
     private Location location;
     private BlockData blockData;
     private Material material;
-    private byte data;
     private Inventory inventory;
     private List<ExplosionRegen> blockQueue = new ArrayList<>();
     private List<ExplosionRegen> transparentQueue = new ArrayList<>();
-    private List<Inventory> blockInventory = new ArrayList<>();
-    private Random random;
 
     private EggSplosion plugin;
 
@@ -46,28 +42,13 @@ public class ExplosionRegen implements Listener {
         this.location = block.getLocation();
         this.material = block.getType();
         this.blockData = block.getBlockData();
-        this.data = block.getData();
         if (block.getType() == Material.CHEST) {
             Chest chest = (Chest) block.getState();
-            inventory = Bukkit.createInventory(null, 27, "" + chest.getLocation().getBlockX());
-            if (chest.getInventory().getSize() <= 27) {
-                inventory.setContents(chest.getBlockInventory().getContents());
-            } else {
-                Bukkit.getLogger().info("Double chest -> WIP");
-            }
-
+            inventory = Bukkit.createInventory(null, 27, "" + chest.getLocation().getBlockX() + "" + chest.getLocation().getBlockZ());
+            inventory.setContents(chest.getBlockInventory().getContents());
+            chest.getBlockInventory().clear();
         }
     }
-
-
-    /*
-    private ExplosionRegen(Block block, Bisected.Half bisectedHalf) {
-        this.location = block.getLocation();
-        this.material = block.getType();
-        this.bisectedHalf = bisectedHalf;
-        this.data = block.getData();
-    }
-    */
 
     public void update() {
       if (material != Material.AIR) {
@@ -84,24 +65,30 @@ public class ExplosionRegen implements Listener {
           Block blockBelow = location.clone().add(0, -1, 0).getBlock();
           if (blockBelow.getType() != material) {
             Bisected testBisected = (Bisected) blockData;
-
-            if (!blockBelow.getType().isSolid()) {
-              blockBelow.setType(Material.GRASS_BLOCK);
+            Stairs testStair = null;
+            try {
+              testStair = (Stairs) blockData;
+            } catch (ClassCastException e) {
             }
+            if (testBisected.getHalf() != null && testStair == null) {
+              if (!blockBelow.getType().isSolid()) {
+                blockBelow.setType(Material.GRASS_BLOCK);
+              }
 
-            // Upper Block
-            Block upperBlock = location.clone().add(0, 1, 0).getBlock();
-            upperBlock.setType(material, false);
+              // Upper Block
+              Block upperBlock = location.clone().add(0, 1, 0).getBlock();
+              upperBlock.setType(material, false);
 
-            //Lower Block
-            BlockData lowerBlockData = block.getBlockData();
-            ((Bisected) lowerBlockData).setHalf(Bisected.Half.BOTTOM);
-            block.setBlockData(lowerBlockData);
+              //Lower Block
+              BlockData lowerBlockData = block.getBlockData();
+              ((Bisected) lowerBlockData).setHalf(Bisected.Half.BOTTOM);
+              block.setBlockData(lowerBlockData);
 
-            //Upper Block
-            Bisected upperBlockData = (Bisected) upperBlock.getBlockData();
-            upperBlockData.setHalf(Bisected.Half.TOP);
-            upperBlock.setBlockData((BlockData) upperBlockData);
+              //Upper Block
+              Bisected upperBlockData = (Bisected) upperBlock.getBlockData();
+              upperBlockData.setHalf(Bisected.Half.TOP);
+              upperBlock.setBlockData((BlockData) upperBlockData);
+            }
           }
         } catch (ClassCastException e) {
           // Do Nothing not a Bisected Block
@@ -205,7 +192,7 @@ public class ExplosionRegen implements Listener {
       });
 
       // Combine Solid and Non-Solid to a single list
-      List<ExplosionRegen> allBlocks = new ArrayList(blockInfo);
+      List<ExplosionRegen> allBlocks = new ArrayList<>(blockInfo);
       allBlocks.addAll(transparentBlocks);
 
       // Runnable to Delay Regen

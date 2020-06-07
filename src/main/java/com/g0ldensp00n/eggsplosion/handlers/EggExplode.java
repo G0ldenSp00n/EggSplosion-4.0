@@ -6,7 +6,6 @@ import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -30,7 +29,7 @@ public void entityCollide(ProjectileHitEvent projectileHitEvent) {
           World world = projectileHitEvent.getEntity().getWorld();
           Location location = projectileHitEvent.getEntity().getLocation();
 
-          location.getWorld().createExplosion(location, explosionPower, false, true, (Entity) playerShooter);
+          world.createExplosion(location, explosionPower, false, true, (Entity) playerShooter);
         }
       }
     }
