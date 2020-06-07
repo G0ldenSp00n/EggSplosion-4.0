@@ -1,11 +1,10 @@
-/*
 package com.g0ldensp00n.eggsplosion.handlers;
 
 import org.bukkit.Bukkit;
 import java.util.*;
 import org.bukkit.entity.Player;
 
-public class GameMode {
+public class LobbyManager {
     enum GameMode {
       LOBBY,
       DEATH_MATCH
@@ -15,4 +14,3 @@ public class GameMode {
 
 
 }
-*/
