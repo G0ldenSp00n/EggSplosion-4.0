@@ -18,11 +18,11 @@ public class EggSplosion extends JavaPlugin{
         versionNumber = Bukkit.getServer().getPluginManager().getPlugin("EggSplosion").getDescription().getVersion();
         getLogger().info("Enabled EggSplosion v" + versionNumber);
         explosionRegen = new ExplosionRegen(this);
+        DeathMessages deathMessages = new DeathMessages(this);
         EggExplode eggExplode = new EggExplode(this);
         Weapon weapon = new Weapon(this);
         RespawnHandler death = new RespawnHandler(this);
         WeaponSelector shop = new WeaponSelector(this);
-        DeathMessages deathMessages = new DeathMessages(this);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.g0ldensp00n.eggsplosion.handlers;
 
 import org.bukkit.Bukkit;
+import java.util.*;
 import org.bukkit.Sound;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Player;
@@ -15,9 +16,9 @@ import java.util.ArrayList;
 
 public class Weapon implements Listener {
     private ArrayList<Player> reloadingPlayers = new ArrayList<>();
+    private Map<String, Long> reloadingPlayerTimes = new Hashtable<String, Long>(); 
     private Plugin plugin;
 
-    private long timeMilis;
 
     public Weapon(Plugin plugin) {
         this.plugin = plugin;
@@ -31,23 +32,23 @@ public class Weapon implements Listener {
             switch(playerInteractEvent.getItem().getType()){
                 case DIAMOND_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 2, 6, 20);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 6, 25);
                     break;
                 case GOLDEN_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 2, 7, 25);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 5, 20);
                     break;
                 case IRON_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 2, 5, 30);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 4, 15);
                     break;
                 case STONE_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 1, 5, 35);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 3, 10);
                     break;
                 case WOODEN_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 1, 4, 40);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 2, 5);
                     break;
                 default:
                     break;
@@ -57,9 +58,10 @@ public class Weapon implements Listener {
     }
 
     private void launchWeapon(Player player, int velocityMultiplier,  int explosionPower, long reloadTime) {
-        if(timeMilis + (reloadTime * 50) < System.currentTimeMillis()){
+        Long playerReloadTime = reloadingPlayerTimes.get(player.getUniqueId().toString());
+        if(playerReloadTime == null || playerReloadTime + (reloadTime * 50) < System.currentTimeMillis()){
             reloadingPlayers.remove(player);
-            timeMilis = System.currentTimeMillis();
+            reloadingPlayerTimes.put(player.getUniqueId().toString(),(Long) System.currentTimeMillis());
         }
 
         if (!reloadingPlayers.contains(player)) {
