@@ -81,7 +81,7 @@ public class Weapon implements Listener {
                     maxXP = maxXP - divideXP;
                 } else {
                     player.setExp(0);
-                    player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 2, 2);
+                    player.playSound(player.getLocation(), Sound.ENTITY_TURTLE_EGG_CRACK, 1, 1);
                     cancel();
                 }
             }
@@ -89,6 +89,7 @@ public class Weapon implements Listener {
     }
 
     private void fireWeapon(Player player, int velocityMultiplier, int explosionSize){
+      player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 0.2f, 1f);
         Egg egg = player.launchProjectile(Egg.class);
         egg.setCustomName(player.getUniqueId() + " / " + explosionSize);
         egg.setVelocity(egg.getVelocity().multiply(velocityMultiplier));

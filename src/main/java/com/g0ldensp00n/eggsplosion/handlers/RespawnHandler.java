@@ -17,7 +17,6 @@ public class RespawnHandler implements Listener {
     @EventHandler
     public void playerTakeDamage(EntityDamageEvent entityDamageEvent) {
         if (entityDamageEvent.getEntity().getType().equals(EntityType.PLAYER)) {
-          switch ()
           Player player = (Player) entityDamageEvent.getEntity();
           if ((player.getHealth() - entityDamageEvent.getFinalDamage()) <= 0) {
             entityDamageEvent.setCancelled(true);
