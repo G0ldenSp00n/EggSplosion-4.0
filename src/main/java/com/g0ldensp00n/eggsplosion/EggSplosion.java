@@ -5,7 +5,9 @@ import com.g0ldensp00n.eggsplosion.handlers.EggExplode;
 import com.g0ldensp00n.eggsplosion.handlers.ExplosionRegen;
 import com.g0ldensp00n.eggsplosion.handlers.Weapon;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyMenuSystem;
+import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameModeListeners;
 import com.g0ldensp00n.eggsplosion.handlers.DeathMessages;
+import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameModeListeners;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
 import com.g0ldensp00n.eggsplosion.handlers.Food;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.MapManager;
@@ -16,6 +18,7 @@ public class EggSplosion extends JavaPlugin {
     private String versionNumber;
     private ExplosionRegen explosionRegen;
     private MapManager mapManager;
+    private LobbyManager lobbyManager;
     public String pluginFolder = getDataFolder().getAbsolutePath();
 
     @Override
@@ -24,10 +27,11 @@ public class EggSplosion extends JavaPlugin {
         getLogger().info("Enabled EggSplosion v" + versionNumber);
         explosionRegen = new ExplosionRegen(this);
         mapManager = new MapManager(this, pluginFolder);
-        LobbyManager lobbyManager = LobbyManager.getInstance(this, mapManager); 
+        lobbyManager = LobbyManager.getInstance(this, mapManager); 
         DeathMessages deathMessages = new DeathMessages(this, lobbyManager);
         EggExplode eggExplode = new EggExplode(this);
         Weapon weapon = new Weapon(this);
+        GameModeListeners gameModeListeners = new GameModeListeners(this, lobbyManager, mapManager);
         RespawnHandler death = new RespawnHandler(this, lobbyManager);
         LobbyMenuSystem shop = new LobbyMenuSystem(this, lobbyManager, mapManager);
         Food food = new Food(this);
@@ -40,6 +44,7 @@ public class EggSplosion extends JavaPlugin {
     public void onDisable() {
         explosionRegen.repairAll();
         mapManager.saveMapsToFiles();
+        lobbyManager.cleanupLobbies();
         getLogger().info("Disabled EggSplosion v" + versionNumber); 
     }
 }

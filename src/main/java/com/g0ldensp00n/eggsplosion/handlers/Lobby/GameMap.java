@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 public class GameMap {
@@ -15,6 +17,8 @@ public class GameMap {
   private List<Location> teamASpawnLocations;
   private List<Location> teamBSpawnLocations;
   private List<GameMode> supportedGameModes;
+  private Location teamAFlagLocation;
+  private Location teamBFlagLocation;
 
   public GameMap(Location cornerA, Location cornerB) {
     this.cornerA = cornerA;
@@ -47,10 +51,66 @@ public class GameMap {
     return teamBSpawnLocations;
   }
 
-  public void loadMapFromFile(List<Location> soloSpawnLocations, List<Location> teamASpawnLocations, List<Location> teamBSpawnLocations) {
+  public void spawnFlag(Team team) {
+    Location flagLocation;
+    Material flagType;
+    if (team == Team.TEAM_A) {
+      flagLocation = teamAFlagLocation.clone();
+      flagType = Material.RED_BANNER;
+    } else if (team == Team.TEAM_B) {
+      flagLocation = teamBFlagLocation.clone();
+      flagType = Material.BLUE_BANNER;
+    } else {
+      return;
+    }
+
+    flagLocation.add(0, 1, 0);
+    Block teamFlag = flagLocation.getBlock();
+    Location teamFlagBase = flagLocation.clone();
+    teamFlagBase.add(0, -1, 0);
+    Block teamFlagBaseBlock = teamFlagBase.getBlock();
+
+    teamFlag.setType(flagType);
+    teamFlagBaseBlock.setType(Material.OBSIDIAN);
+  }
+
+  public void spawnFlags() {
+    if (teamAFlagLocation != null) {
+      spawnFlag(Team.TEAM_A);
+    }
+
+    if (teamBFlagLocation != null) {
+      spawnFlag(Team.TEAM_B);
+    }
+  }
+
+  public void respawnFlag(Team team) {
+    spawnFlag(team);
+  }
+
+  public void setTeamAFlagLocation(Location location) {
+    teamAFlagLocation = location;
+  }
+
+  public void setTeamBFlagLocation(Location location) {
+    teamBFlagLocation = location;
+  }
+
+  public Location getTeamAFlagLocation() {
+    return teamAFlagLocation;
+  }
+
+  public Location getTeamBFlagLocation() {
+    return teamBFlagLocation;
+  }
+
+  public void loadMapFromFile(List<Location> soloSpawnLocations, List<Location> teamASpawnLocations, List<Location> teamBSpawnLocations, Location teamAFlagLocation, Location teamBFlagLocation) {
     this.soloSpawnLocations = soloSpawnLocations;
     this.teamASpawnLocations = teamASpawnLocations;
     this.teamBSpawnLocations = teamBSpawnLocations;
+
+    this.teamAFlagLocation = teamAFlagLocation;
+    this.teamBFlagLocation = teamBFlagLocation;
   }
 
   public void addSupportedGameMode(GameMode gameMode) {

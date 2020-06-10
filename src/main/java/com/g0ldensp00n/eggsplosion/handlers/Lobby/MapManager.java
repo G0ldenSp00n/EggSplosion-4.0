@@ -81,7 +81,7 @@ public class MapManager implements Listener, CommandExecutor {
         List<Location> soloSpawnLocations = convertToLocationList(soloSpawnItems);
         List<Location> teamASpawnLocations = convertToLocationList(teamASpawnItems);
         List<Location> teamBSpawnLocations = convertToLocationList(teamBSpawnItems);
-        map.loadMapFromFile(soloSpawnLocations, teamASpawnLocations, teamBSpawnLocations);
+        map.loadMapFromFile(soloSpawnLocations, teamASpawnLocations, teamBSpawnLocations, mapConfigFile.getLocation("teamAFlagLocation"), mapConfigFile.getLocation("teamBFlagLocation"));
 
         gameMaps.put(fileName, map);
       }
@@ -98,6 +98,8 @@ public class MapManager implements Listener, CommandExecutor {
 
         mapConfigFile.set("cornerA", map.getCornerA());
         mapConfigFile.set("cornerB", map.getCornerB());
+        mapConfigFile.set("teamAFlagLocation", map.getTeamAFlagLocation());
+        mapConfigFile.set("teamBFlagLocation", map.getTeamBFlagLocation());
         mapConfigFile.set("soloSpawnLocations", map.getSoloSpawnLocations());
         mapConfigFile.set("teamASpawnLocations", map.getTeamASpawnLocations());
         mapConfigFile.set("teamBSpawnLocations", map.getTeamBSpawnLocations());
@@ -221,6 +223,32 @@ public class MapManager implements Listener, CommandExecutor {
               player.sendMessage("Spawn Point must be in Map Boundary");
             }
           }
+        } else if (mappingTool.getType().equals(Material.GOLDEN_SHOVEL)) {
+          List<String> itemLore = mappingTool.getItemMeta().getLore();
+          String mapName = itemLore.get(0).split(":")[1].trim();
+          GameMap map = gameMaps.get(mapName);
+          if (map != null) {
+            Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
+            if (map.locationInMap(flagLocation)) {
+              map.setTeamAFlagLocation(flagLocation);
+              player.sendMessage("Set" + ChatColor.RED + " Team A " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
+            } else {
+              player.sendMessage("Flag Location must be in Map Boundary");
+            }
+          }
+        } else if (mappingTool.getType().equals(Material.DIAMOND_SHOVEL)) {
+          List<String> itemLore = mappingTool.getItemMeta().getLore();
+          String mapName = itemLore.get(0).split(":")[1].trim();
+          GameMap map = gameMaps.get(mapName);
+          if (map != null) {
+            Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
+            if (map.locationInMap(flagLocation)) {
+              map.setTeamBFlagLocation(flagLocation);
+              player.sendMessage("Set" + ChatColor.BLUE + " Team B " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
+            } else {
+              player.sendMessage("Flag Location must be in Map Boundary");
+            }
+          }
         }
       }
     }
@@ -245,8 +273,16 @@ public class MapManager implements Listener, CommandExecutor {
 
                 ItemStack Map_Tool_spawnPointsTeamA = createMapTool(Material.GOLDEN_AXE, "Spawn Point Tool - Team A", lore);
                 ItemStack Map_Tool_spawnPointsTeamB = createMapTool(Material.DIAMOND_AXE, "Spawn Point Tool - Team B", lore);
+
+                ItemStack Map_Tool_flagSpawnTeamA = createMapTool(Material.GOLDEN_SHOVEL, "Flag Spawn - Team A", lore);
+                ItemStack Map_Tool_flagSpawnTeamB = createMapTool(Material.DIAMOND_SHOVEL, "Flag Spawn - Team B", lore);
+
+
                 player.getInventory().setItem(2, Map_Tool_spawnPointsTeamA);
                 player.getInventory().setItem(3, Map_Tool_spawnPointsTeamB);
+
+                player.getInventory().setItem(5, Map_Tool_flagSpawnTeamA);
+                player.getInventory().setItem(6, Map_Tool_flagSpawnTeamB);
 
 
                 player.sendMessage("Select the boudrys of the map by right clicking the shovel, then run the command /map create <mapName>");

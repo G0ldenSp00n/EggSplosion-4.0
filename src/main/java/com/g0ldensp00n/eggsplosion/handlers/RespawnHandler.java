@@ -1,6 +1,9 @@
 package com.g0ldensp00n.eggsplosion.handlers;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -9,9 +12,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
 import java.util.*;
 
+import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameMode;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.Lobby;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.ScoreType;
@@ -50,6 +56,16 @@ public class RespawnHandler implements Listener {
           Lobby playersLobby = lobbyManager.getPlayersLobby(player);
           Location spawnPoint = playersLobby.getMap().getSpawnPoint(Team.SOLO);
           if (playersLobby.getScoreboardManager() != null && playersLobby.getScoreboardManager().getScoreType() == ScoreType.TEAM) {
+            if (playersLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
+              if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
+                playersLobby.broadcastMessage(player.getDisplayName() + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
+                playersLobby.getMap().respawnFlag(Team.TEAM_B);
+              } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
+                playersLobby.broadcastMessage(player.getDisplayName() + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
+                playersLobby.getMap().respawnFlag(Team.TEAM_A);
+              }
+              playersLobby.equipPlayer(player);
+            }
             if (playersLobby.getScoreboardManager().getTeamA().hasEntry(player.getDisplayName())) {
               spawnPoint = playersLobby.getMap().getSpawnPoint(Team.TEAM_A);
             } else if (playersLobby.getScoreboardManager().getTeamB().hasEntry(player.getDisplayName())) {

@@ -77,7 +77,7 @@ public class LobbyManager implements Listener, CommandExecutor {
         Bukkit.getLogger().info("" + getMainLobby());
         getMainLobby().addPlayer(player);
         getMainLobby().broadcastMessage(player.getDisplayName() + " Joined Lobby");
-      }
+      } 
     }
 
     public void joinLobby(Lobby lobby, Player player) {
@@ -91,6 +91,20 @@ public class LobbyManager implements Listener, CommandExecutor {
         }
       }
     }
+
+    public void cleanupLobbies() {
+      for(Lobby oldLobby: lobbies.values()) {
+        if (oldLobby != getMainLobby()) {
+          getMainLobby().addPlayers(oldLobby.getPlayers());
+          oldLobby.removeAllPlayers();
+        }
+      }
+
+      Lobby mainLobby = getMainLobby();
+      lobbies = new Hashtable<>();
+      lobbies.put("MAIN_LOBBY", mainLobby);
+    }
+
 
     public Boolean canPlayerAttackPlayer(Player playerA, Player playerB) {
       Lobby playerLobby = lobbyManager.getPlayersLobby(playerA);

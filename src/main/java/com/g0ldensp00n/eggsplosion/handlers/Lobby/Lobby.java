@@ -149,6 +149,10 @@ public class Lobby {
   }
 
   public void removeAllPlayers() {
+    for (Player player: playersInLobby) {
+      removePlayerCleanup(player);
+    }
+
     playersInLobby = new ArrayList<>();
   }
 
@@ -280,10 +284,15 @@ public class Lobby {
         setMap(mapManager.getMapByName(mapName), ScoreType.SOLO);
         break;
       case TEAM_DEATH_MATCH:
-      case CAPTURE_THE_FLAG:
-        setScoreManager(new ScoreManager(2, ScoreType.TEAM, this));
+        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this));
         randomizeTeams();
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
+        break;
+      case CAPTURE_THE_FLAG:
+        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this));
+        randomizeTeams();
+        setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
+        this.currentMap.spawnFlags();
         break;
       default:
         break;
@@ -382,7 +391,6 @@ public class Lobby {
 
   public void equipPlayer(Player player) {
     if (playersInLobby.contains(player)) {
-      Bukkit.getLogger().info("Clearing player inventory " + player.getDisplayName());
       player.getInventory().clear();
       switch (currentGamemode) {
         case WAITING: {
@@ -484,8 +492,7 @@ public class Lobby {
     if (maxPlayers == -1 || maxPlayers <= (playersInLobby.size() + players.size())) {
       for(Player player: players) {
         if (player != null) {
-          this.addPlayer(player);
-          equipPlayer(player);
+          addPlayer(player);
         }
       }
       return true;
@@ -493,13 +500,17 @@ public class Lobby {
     return false;
   }
 
-  public void removePlayer(Player player) {
+  private void removePlayerCleanup(Player player) {
     if (scoreManager != null) {
       player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
       if (scoreManager.getTeamA().hasEntry(player.getDisplayName()) || scoreManager.getTeamB().hasEntry(player.getDisplayName())) {
         player.setDisplayName(player.getDisplayName().substring(2, player.getDisplayName().length() - 2));
       }
     }
+  }
+
+  public void removePlayer(Player player) {
+    removePlayerCleanup(player);
     playersInLobby.remove(player);
   }
 

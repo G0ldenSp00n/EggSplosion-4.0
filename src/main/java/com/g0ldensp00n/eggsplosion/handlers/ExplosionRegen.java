@@ -141,7 +141,7 @@ public class ExplosionRegen implements Listener {
 
         // Handle Solid Block
           if (block.getType().isSolid()) {
-              if (!block.getType().equals(Material.TNT) && !block.getType().equals(Material.BLUE_BANNER)) {
+              if (!block.getType().equals(Material.TNT) && !block.getType().equals(Material.BLUE_BANNER) && !block.getType().equals(Material.RED_BANNER)) {
                   blockInfo.add(new ExplosionRegen(block));
                   block.setType(Material.AIR, false);
               } else if (block.getType().equals(Material.TNT)) {
