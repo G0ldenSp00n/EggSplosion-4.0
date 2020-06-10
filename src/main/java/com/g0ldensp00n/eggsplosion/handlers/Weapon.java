@@ -28,23 +28,24 @@ public class Weapon implements Listener {
     @EventHandler
     public void playerInteractEvent(PlayerInteractEvent playerInteractEvent) {
       if (playerInteractEvent.getItem() != null) {
+        // Possible Explosion Caluculation -5.3x+(3.7x^2)
         if((playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_AIR) || playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK))){
             switch(playerInteractEvent.getItem().getType()){
                 case DIAMOND_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 2, 6, 25);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 3, (long) 21.75);
                     break;
                 case GOLDEN_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 2, 5, 20);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 2.8f, (long) 17.75);
                     break;
                 case IRON_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 2, 4, 15);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 2.6f, (long) 14);
                     break;
                 case STONE_HOE:
                         playerInteractEvent.setCancelled(true);
-                        launchWeapon(playerInteractEvent.getPlayer(), 2, 3, 10);
+                        launchWeapon(playerInteractEvent.getPlayer(), 2, 2.4f, (long) 10.625);
                     break;
                 case WOODEN_HOE:
                         playerInteractEvent.setCancelled(true);
@@ -57,7 +58,7 @@ public class Weapon implements Listener {
       }
     }
 
-    private void launchWeapon(Player player, int velocityMultiplier,  int explosionPower, long reloadTime) {
+    private void launchWeapon(Player player, int velocityMultiplier,  float explosionPower, long reloadTime) {
         Long playerReloadTime = reloadingPlayerTimes.get(player.getUniqueId().toString());
         if(playerReloadTime == null || playerReloadTime + (reloadTime * 50) < System.currentTimeMillis()){
             reloadingPlayers.remove(player);
@@ -83,14 +84,14 @@ public class Weapon implements Listener {
                     maxXP = maxXP - divideXP;
                 } else {
                     player.setExp(0);
-                    player.playSound(player.getLocation(), Sound.ENTITY_TURTLE_EGG_CRACK, 1, 1);
+                    player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 0.5f, 2);
                     cancel();
                 }
             }
-        }.runTaskTimer(this.plugin, 0, 1);
+      }.runTaskTimer(this.plugin, 0, 1);
     }
 
-    private void fireWeapon(Player player, int velocityMultiplier, int explosionSize){
+    private void fireWeapon(Player player, int velocityMultiplier, float explosionSize){
       player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 0.2f, 1f);
         Egg egg = player.launchProjectile(Egg.class);
         egg.setCustomName(player.getUniqueId() + " / " + explosionSize);

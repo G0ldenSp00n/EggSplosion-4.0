@@ -1,1 +1,8 @@
 api-version: 1.13
+commands:
+  lobby:
+    description: Join a lobby
+    usage: /lobby <join|create|list> <lobbyName>
+  map:
+    description: Create and Edit Maps
+    usage: /map <tools>

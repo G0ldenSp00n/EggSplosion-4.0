@@ -4,12 +4,12 @@ import com.g0ldensp00n.eggsplosion.EggSplosion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.Chest;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -104,7 +104,7 @@ public class ExplosionRegen implements Listener {
     public void explosionRegeneration(EntityExplodeEvent event) {
       event.setCancelled(true);
 
-      final int delay = 20 * 3;
+      final int delay = 20 * 10;
       List<ExplosionRegen> blockInfo = new ArrayList<>();
       List<ExplosionRegen> transparentBlocks = new ArrayList<>();
       List<Block> blocks = event.blockList();
@@ -147,8 +147,8 @@ public class ExplosionRegen implements Listener {
               } else if (block.getType().equals(Material.TNT)) {
                   blockInfo.add(new ExplosionRegen(block));
                   block.setType(Material.AIR, false);
-                  TNTPrimed tntPrimed = block.getWorld().spawn(block.getLocation(), TNTPrimed.class);
-                  tntPrimed.setFuseTicks(5);
+                  block.getLocation().getWorld().createExplosion(block.getLocation(), 2.8f, false, true, event.getEntity());
+                  block.getLocation().getWorld().spawnParticle(Particle.EXPLOSION_HUGE, block.getLocation(), 0);
               }
         // Handle Non-Solid Blocks
           } else {
@@ -201,7 +201,7 @@ public class ExplosionRegen implements Listener {
 
           @Override
           public void run() {
-              for (int blocksPlaced = 0; blocksPlaced < 10; blocksPlaced++) {
+              for (int blocksPlaced = 0; blocksPlaced < 3; blocksPlaced++) {
                 if (allBlocksQueue.hasNext()) {
                   ExplosionRegen blockToPlace = allBlocksQueue.next();
                   blockToPlace.update();

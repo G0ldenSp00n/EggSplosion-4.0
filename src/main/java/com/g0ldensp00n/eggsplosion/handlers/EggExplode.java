@@ -2,6 +2,8 @@ package com.g0ldensp00n.eggsplosion.handlers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -20,9 +22,9 @@ public EggExplode(Plugin plugin) {
 @EventHandler
 public void entityCollide(ProjectileHitEvent projectileHitEvent) {
     if (projectileHitEvent.getEntity().getType() == EntityType.EGG) {
-      if (projectileHitEvent.getEntity().getName().split(" / ").length > 0) {
+      if (projectileHitEvent.getEntity().getName().split(" / ").length >= 2) {
 
-        int explosionPower = Integer.parseInt(projectileHitEvent.getEntity().getName().split(" / ")[1]);
+        float explosionPower = Float.parseFloat(projectileHitEvent.getEntity().getName().split(" / ")[1]);
         Entity entityShooter = (Entity) projectileHitEvent.getEntity().getShooter();
         if (Bukkit.getOfflinePlayer(entityShooter.getUniqueId()) != null) {
           Player playerShooter = Bukkit.getOfflinePlayer(entityShooter.getUniqueId()).getPlayer();
@@ -30,6 +32,8 @@ public void entityCollide(ProjectileHitEvent projectileHitEvent) {
           Location location = projectileHitEvent.getEntity().getLocation();
 
           world.createExplosion(location, explosionPower, false, true, (Entity) playerShooter);
+          world.spawnParticle(Particle.EXPLOSION_HUGE, location, 0);
+          world.playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 3, 1);
         }
       }
     }

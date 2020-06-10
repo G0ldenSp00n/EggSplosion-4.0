@@ -7,54 +7,63 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 import java.util.*;
 
+import com.g0ldensp00n.eggsplosion.handlers.Lobby.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.Lobby.ScoreType;
+import com.g0ldensp00n.eggsplosion.handlers.Lobby.Team;
+
 public class RespawnHandler implements Listener {
-    public RespawnHandler(Plugin plugin) {
-        Bukkit.getPluginManager().registerEvents(this, plugin);
-    }
+  private LobbyManager lobbyManager;
+  
+  public RespawnHandler(Plugin plugin, LobbyManager lobbyManager) {
+    this.lobbyManager = lobbyManager;
+    Bukkit.getPluginManager().registerEvents(this, plugin);
+  }
 
-    List<Location> spawnPoints = new ArrayList<>();
+  List<Location> spawnPoints = new ArrayList<>();
 
-    @EventHandler
-    public void playerTakeDamage(EntityDamageEvent entityDamageEvent) {
-        if (entityDamageEvent.getEntity().getType().equals(EntityType.PLAYER)) {
-          Player player = (Player) entityDamageEvent.getEntity();
-          if ((player.getHealth() - entityDamageEvent.getFinalDamage()) <= 0) {
-            entityDamageEvent.setCancelled(true);
-            player.setHealth(20);
-            if (spawnPoints.size() > 0) {
-              Random rand = new Random();
-              player.teleport(spawnPoints.get(rand.nextInt(spawnPoints.size())));
-            } else {
-              player.teleport(player.getWorld().getSpawnLocation());
-            }
-            player.playSound(player.getLocation(), Sound.ENTITY_BAT_DEATH, 1, 1);
-          }
-        }
-    }
+  @EventHandler
+  public void playerTakeDamage(EntityDamageEvent entityDamageEvent) {
+    if (entityDamageEvent instanceof EntityDamageByEntityEvent) {
+      EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) entityDamageEvent;
 
-    @EventHandler
-    public void playerInteractEvent(PlayerInteractEvent playerInteractEvent) {
-      if (playerInteractEvent.getItem() != null) {
-        if((playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK))){
-            switch(playerInteractEvent.getItem().getType()){
-                case WOODEN_AXE:
-                  Player spawnPointSetter = playerInteractEvent.getPlayer();
-                  Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation().add(0, 1, 0);
-                  spawnPoint.setYaw(spawnPointSetter.getLocation().getYaw());
-                  spawnPointSetter.sendMessage("Spawn Point Added");
-                  spawnPoints.add(spawnPoint);
-                  break;
-                default:
-                  break;
-            }
+      if (entityDamageByEntityEvent.getEntity() instanceof Player && entityDamageByEntityEvent.getDamager() instanceof Player) {
+        Player player = (Player) entityDamageByEntityEvent.getEntity(); 
+        Player damager = (Player) entityDamageByEntityEvent.getDamager();
+
+        if (!lobbyManager.canPlayerAttackPlayer(player, damager)) {
+          entityDamageEvent.setCancelled(true);
+          return;
         }
       }
     }
+      if (entityDamageEvent.getEntity().getType().equals(EntityType.PLAYER)) {
+        Player player = (Player) entityDamageEvent.getEntity();
+        if ((player.getHealth() - entityDamageEvent.getFinalDamage()) <= 0) {
+          entityDamageEvent.setCancelled(true);
+          player.setHealth(20);
+          Lobby playersLobby = lobbyManager.getPlayersLobby(player);
+          Location spawnPoint = playersLobby.getMap().getSpawnPoint(Team.SOLO);
+          if (playersLobby.getScoreboardManager() != null && playersLobby.getScoreboardManager().getScoreType() == ScoreType.TEAM) {
+            if (playersLobby.getScoreboardManager().getTeamA().hasEntry(player.getDisplayName())) {
+              spawnPoint = playersLobby.getMap().getSpawnPoint(Team.TEAM_A);
+            } else if (playersLobby.getScoreboardManager().getTeamB().hasEntry(player.getDisplayName())) {
+              spawnPoint = playersLobby.getMap().getSpawnPoint(Team.TEAM_B);
+            }
+          }
 
+          if (spawnPoint != null) {
+            player.teleport(spawnPoint);
+          } else {
+            player.teleport(player.getWorld().getSpawnLocation());
+          }
+          player.playSound(player.getLocation(), Sound.ENTITY_BAT_DEATH, 1, 1);
+        }
+      }
+  }
 }
