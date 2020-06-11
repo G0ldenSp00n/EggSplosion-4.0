@@ -26,8 +26,8 @@ public void entityCollide(ProjectileHitEvent projectileHitEvent) {
 
         float explosionPower = Float.parseFloat(projectileHitEvent.getEntity().getName().split(" / ")[1]);
         Entity entityShooter = (Entity) projectileHitEvent.getEntity().getShooter();
-        if (Bukkit.getOfflinePlayer(entityShooter.getUniqueId()) != null) {
-          Player playerShooter = Bukkit.getOfflinePlayer(entityShooter.getUniqueId()).getPlayer();
+        if (entityShooter instanceof Player) {
+          Player playerShooter = (Player) entityShooter;
           World world = projectileHitEvent.getEntity().getWorld();
           Location location = projectileHitEvent.getEntity().getLocation();
 

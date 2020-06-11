@@ -27,7 +27,7 @@ public class GameModeListeners implements Listener {
   public void playerInteractEvent(PlayerInteractEvent playerInteractEvent) {
     Player player = playerInteractEvent.getPlayer();
     Lobby playerLobby = lobbyManager.getPlayersLobby(player);
-    if (playerLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
+    if (playerLobby != null && playerLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
       if (playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
         playerInteractEvent.setCancelled(true);
         Block clickedBlock = playerInteractEvent.getClickedBlock();
@@ -59,7 +59,7 @@ public class GameModeListeners implements Listener {
   public void playerMoveEvent(PlayerMoveEvent playerMoveEvent) {
     Player player = playerMoveEvent.getPlayer();
     Lobby playerLobby = lobbyManager.getPlayersLobby(player);
-    if (playerLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
+    if (playerLobby != null && playerLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
       if (player.getInventory().getHelmet() != null) {
         if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
           Location playerFlagLocation = playerLobby.getMap().getTeamBFlagLocation().clone();
