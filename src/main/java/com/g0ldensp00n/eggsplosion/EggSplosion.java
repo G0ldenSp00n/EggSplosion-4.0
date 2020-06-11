@@ -31,7 +31,7 @@ public class EggSplosion extends JavaPlugin {
         DeathMessages deathMessages = new DeathMessages(this, lobbyManager);
         EggExplode eggExplode = new EggExplode(this);
         Weapon weapon = new Weapon(this);
-        GameModeListeners gameModeListeners = new GameModeListeners(this, lobbyManager, mapManager);
+        GameModeListeners gameModeListeners = new GameModeListeners(this, lobbyManager);
         RespawnHandler death = new RespawnHandler(this, lobbyManager);
         LobbyMenuSystem shop = new LobbyMenuSystem(this, lobbyManager, mapManager);
         Food food = new Food(this);

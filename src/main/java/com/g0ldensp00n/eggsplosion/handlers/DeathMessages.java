@@ -1,5 +1,9 @@
 package com.g0ldensp00n.eggsplosion.handlers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameMode;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.Lobby;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
@@ -15,10 +19,17 @@ import org.bukkit.plugin.Plugin;
 
 public class DeathMessages implements Listener {
   private LobbyManager lobbyManager;
+  private List<String> deathMessagesPlayerOnPlayer;
 
   public DeathMessages(Plugin plugin, LobbyManager lobbyManager) {
     this.lobbyManager = lobbyManager;
     Bukkit.getPluginManager().registerEvents(this, plugin);
+
+    deathMessagesPlayerOnPlayer = new ArrayList<>();
+    deathMessagesPlayerOnPlayer.add("was scrambled by");
+    deathMessagesPlayerOnPlayer.add("was poached by");
+    deathMessagesPlayerOnPlayer.add("was shelled by");
+    deathMessagesPlayerOnPlayer.add("was Humpty Dumptied by");
   }
 
   @EventHandler
@@ -35,12 +46,15 @@ public class DeathMessages implements Listener {
       if (damager != null && player != null) {
         if(entityDamageEvent.getCause() == DamageCause.ENTITY_EXPLOSION) {
           if ((player.getHealth() - entityDamageEvent.getFinalDamage()) <= 0) {
-            damager.playSound(player.getLocation(), Sound.ENTITY_ZOMBIE_DESTROY_EGG, 1, 3);
+            damager.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
             Lobby damagerLobby = lobbyManager.getPlayersLobby(damager);
             if (damagerLobby.getGameMode() == GameMode.DEATH_MATCH || damagerLobby.getGameMode() == GameMode.TEAM_DEATH_MATCH) {
               damagerLobby.getScoreboardManager().addScorePlayer(damager);
             }
-            Bukkit.getServer().broadcastMessage(player.getDisplayName() + " was scrambled by " + damager.getDisplayName());
+
+            Random random = new Random();
+            String deathMessage = deathMessagesPlayerOnPlayer.get(random.nextInt(deathMessagesPlayerOnPlayer.size()));
+            damagerLobby.broadcastMessage(player.getDisplayName() + " " + deathMessage + " " + damager.getDisplayName());
           } else {
             damager.playSound(damager.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1, 1);
           }

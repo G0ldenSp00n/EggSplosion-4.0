@@ -4,11 +4,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.Team.Option;
 
 public class ScoreManager {
   private Integer scoreToWin;
@@ -35,11 +37,13 @@ public class ScoreManager {
     teamA.setPrefix("" + ChatColor.RED);
     teamA.setColor(ChatColor.RED);
     teamA.setDisplayName(ChatColor.RED + "Red Team");
+    teamA.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
 
     teamB = scoreboard.registerNewTeam("Blue Team");
     teamA.setPrefix("" + ChatColor.BLUE);
     teamB.setColor(ChatColor.BLUE);
     teamB.setDisplayName(ChatColor.BLUE + "Blue Team");
+    teamB.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
   }
 
   public Team getTeamA() {

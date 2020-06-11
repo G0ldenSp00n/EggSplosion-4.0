@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -75,9 +76,11 @@ public class Lobby {
         if (teamA) {
           player.setDisplayName(ChatColor.RED + player.getDisplayName() + ChatColor.RESET);
           scoreManager.getTeamA().addEntry(player.getDisplayName());
+          scoreManager.getTeamA().addPlayer((OfflinePlayer) player);
         } else {
           player.setDisplayName(ChatColor.BLUE + player.getDisplayName() + ChatColor.RESET);
           scoreManager.getTeamB().addEntry(player.getDisplayName());
+          scoreManager.getTeamB().addPlayer((OfflinePlayer) player);
         }
         teamA = !teamA;
         playersToAdd.remove(player);
@@ -116,23 +119,32 @@ public class Lobby {
 
   }
 
-  public boolean addPlayer(Player player) {
+  public String addPlayer(Player player) {
     if (maxPlayers == -1 || playersInLobby.size() <= maxPlayers) {
-      playersInLobby.add(player);
-      readyPlayers.put(player, false);
-      equipPlayer(player);
-      if (lobbyName != "MAIN_LOBBY") {
-        Location spawnPoint = this.currentMap.getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.SOLO);
-        player.teleport(spawnPoint);
-        player.sendMessage("[EggSplosion] You have joined lobby " + ChatColor.AQUA + lobbyName);
-        player.setGameMode(org.bukkit.GameMode.ADVENTURE);
-        player.setFoodLevel(20);
-        player.setHealth(20);
+      if (getGameMode() == GameMode.WAITING) {
+        playersInLobby.add(player);
+        if (!readyPlayers.containsKey(player)) {
+          readyPlayers.put(player, false);
+        }
+        equipPlayer(player);
+        if (lobbyName != "MAIN_LOBBY") {
+          Location spawnPoint = this.currentMap.getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.SOLO);
+          player.teleport(spawnPoint);
+          player.setGameMode(org.bukkit.GameMode.ADVENTURE);
+          player.setFoodLevel(20);
+          player.setHealth(20);
+          return "[EggSplosion] You have joined lobby " + ChatColor.AQUA + lobbyName;
+        }
+      } else {
+        return "[EggSplosion] Can't join a in progress lobby";
       }
-      return true;
     }
 
-    return false;
+    return "[EggSplosion] Can't join a full lobby";
+  }
+
+  public Boolean hasPlayer(Player player) {
+    return getPlayers().contains(player);
   }
 
   public boolean anyOnlinePlayersExcluding(Player excludedPlayer) {
@@ -289,7 +301,7 @@ public class Lobby {
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         break;
       case CAPTURE_THE_FLAG:
-        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this));
+        setScoreManager(new ScoreManager(3, ScoreType.TEAM, this));
         randomizeTeams();
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         this.currentMap.spawnFlags();

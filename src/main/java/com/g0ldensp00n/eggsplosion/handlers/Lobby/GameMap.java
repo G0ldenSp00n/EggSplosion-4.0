@@ -70,8 +70,8 @@ public class GameMap {
     teamFlagBase.add(0, -1, 0);
     Block teamFlagBaseBlock = teamFlagBase.getBlock();
 
-    teamFlag.setType(flagType);
     teamFlagBaseBlock.setType(Material.OBSIDIAN);
+    teamFlag.setType(flagType);
   }
 
   public void spawnFlags() {

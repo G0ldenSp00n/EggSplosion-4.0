@@ -54,22 +54,28 @@ public class RespawnHandler implements Listener {
           entityDamageEvent.setCancelled(true);
           player.setHealth(20);
           Lobby playersLobby = lobbyManager.getPlayersLobby(player);
-          Location spawnPoint = playersLobby.getMap().getSpawnPoint(Team.SOLO);
+          Location spawnPoint = null;
           if (playersLobby.getScoreboardManager() != null && playersLobby.getScoreboardManager().getScoreType() == ScoreType.TEAM) {
             if (playersLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
-              if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
-                playersLobby.broadcastMessage(player.getDisplayName() + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
-                playersLobby.getMap().respawnFlag(Team.TEAM_B);
-              } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
-                playersLobby.broadcastMessage(player.getDisplayName() + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
-                playersLobby.getMap().respawnFlag(Team.TEAM_A);
+              if (player.getInventory().getHelmet() != null) {
+                if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
+                  playersLobby.broadcastMessage(player.getDisplayName() + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
+                  playersLobby.getMap().respawnFlag(Team.TEAM_B);
+                } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
+                  playersLobby.broadcastMessage(player.getDisplayName() + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
+                  playersLobby.getMap().respawnFlag(Team.TEAM_A);
+                }
+                playersLobby.equipPlayer(player);
               }
-              playersLobby.equipPlayer(player);
             }
             if (playersLobby.getScoreboardManager().getTeamA().hasEntry(player.getDisplayName())) {
               spawnPoint = playersLobby.getMap().getSpawnPoint(Team.TEAM_A);
             } else if (playersLobby.getScoreboardManager().getTeamB().hasEntry(player.getDisplayName())) {
               spawnPoint = playersLobby.getMap().getSpawnPoint(Team.TEAM_B);
+            }
+          } else {
+            if (playersLobby.getMap() != null) {
+              spawnPoint = playersLobby.getMap().getSpawnPoint(Team.SOLO);
             }
           }
 

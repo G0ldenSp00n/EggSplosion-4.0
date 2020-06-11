@@ -23,7 +23,8 @@ bukkit {
 
     run {
       eula = true
-      debug = true
+      debug = false
+      onlineMode = true
     }
 }
 

@@ -183,70 +183,80 @@ public class MapManager implements Listener, CommandExecutor {
           }
         } else if (mappingTool.getType().equals(Material.IRON_AXE)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          String mapName = itemLore.get(0).split(":")[1].trim();
-          GameMap map = gameMaps.get(mapName);
-          if (map != null) {
-            Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
-            spawnPoint.setYaw(player.getLocation().getYaw());
-            if (map.locationInMap(spawnPoint)) {
-              map.addSoloSpawnpoint(spawnPoint);
-              player.sendMessage("Added Solo Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
-            } else {
-              player.sendMessage("Spawn Point must be in Map Boundary");
+          if (itemLore.get(0).split(":").length >= 1) {
+            String mapName = itemLore.get(0).split(":")[1].trim();
+            GameMap map = gameMaps.get(mapName);
+            if (map != null) {
+              Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
+              spawnPoint.setYaw(player.getLocation().getYaw());
+              if (map.locationInMap(spawnPoint)) {
+                map.addSoloSpawnpoint(spawnPoint);
+                player.sendMessage("Added Solo Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
+              } else {
+                player.sendMessage("Spawn Point must be in Map Boundary");
+              }
             }
           }
         } else if (mappingTool.getType().equals(Material.GOLDEN_AXE)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          String mapName = itemLore.get(0).split(":")[1].trim();
-          GameMap map = gameMaps.get(mapName);
-          if (map != null) {
-            Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
-            spawnPoint.setYaw(player.getLocation().getYaw());
-            if (map.locationInMap(spawnPoint)) {
-              map.addTeamASpawnPoint(spawnPoint);
-              player.sendMessage("Added" + ChatColor.RED + " Team A " + ChatColor.RESET + "Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
-            } else {
-              player.sendMessage("Spawn Point must be in Map Boundary");
+          if (itemLore.get(0).split(":").length >= 1) {
+            String mapName = itemLore.get(0).split(":")[1].trim();
+            GameMap map = gameMaps.get(mapName);
+            if (map != null) {
+              Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
+              spawnPoint.setYaw(player.getLocation().getYaw());
+              if (map.locationInMap(spawnPoint)) {
+                map.addTeamASpawnPoint(spawnPoint);
+                player.sendMessage("Added" + ChatColor.RED + " Team A " + ChatColor.RESET + "Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
+              } else {
+                player.sendMessage("Spawn Point must be in Map Boundary");
+              }
             }
           }
         } else if (mappingTool.getType().equals(Material.DIAMOND_AXE)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          String mapName = itemLore.get(0).split(":")[1].trim();
-          GameMap map = gameMaps.get(mapName);
-          if (map != null) {
-            Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
-            spawnPoint.setYaw(player.getLocation().getYaw());
-            if (map.locationInMap(spawnPoint)) {
-              map.addTeamBSpawnPoint(spawnPoint);
-              player.sendMessage("Added" + ChatColor.BLUE + " Team B " + ChatColor.RESET + "Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
-            } else {
-              player.sendMessage("Spawn Point must be in Map Boundary");
+          if (itemLore.get(0).split(":").length >= 1) {
+            String mapName = itemLore.get(0).split(":")[1].trim();
+            GameMap map = gameMaps.get(mapName);
+            if (map != null) {
+              Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
+              spawnPoint.setYaw(player.getLocation().getYaw());
+              if (map.locationInMap(spawnPoint)) {
+                map.addTeamBSpawnPoint(spawnPoint);
+                player.sendMessage("Added" + ChatColor.BLUE + " Team B " + ChatColor.RESET + "Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
+              } else {
+                player.sendMessage("Spawn Point must be in Map Boundary");
+              }
             }
           }
         } else if (mappingTool.getType().equals(Material.GOLDEN_SHOVEL)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          String mapName = itemLore.get(0).split(":")[1].trim();
-          GameMap map = gameMaps.get(mapName);
-          if (map != null) {
-            Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
-            if (map.locationInMap(flagLocation)) {
-              map.setTeamAFlagLocation(flagLocation);
-              player.sendMessage("Set" + ChatColor.RED + " Team A " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
-            } else {
-              player.sendMessage("Flag Location must be in Map Boundary");
+          if (itemLore.get(0).split(":").length >= 1) {
+            String mapName = itemLore.get(0).split(":")[1].trim();
+            GameMap map = gameMaps.get(mapName);
+            if (map != null) {
+              Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
+              if (map.locationInMap(flagLocation)) {
+                map.setTeamAFlagLocation(flagLocation);
+                player.sendMessage("Set" + ChatColor.RED + " Team A " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
+              } else {
+                player.sendMessage("Flag Location must be in Map Boundary");
+              }
             }
           }
         } else if (mappingTool.getType().equals(Material.DIAMOND_SHOVEL)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          String mapName = itemLore.get(0).split(":")[1].trim();
-          GameMap map = gameMaps.get(mapName);
-          if (map != null) {
-            Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
-            if (map.locationInMap(flagLocation)) {
-              map.setTeamBFlagLocation(flagLocation);
-              player.sendMessage("Set" + ChatColor.BLUE + " Team B " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
-            } else {
-              player.sendMessage("Flag Location must be in Map Boundary");
+          if (itemLore.get(0).split(":").length >= 1) {
+            String mapName = itemLore.get(0).split(":")[1].trim();
+            GameMap map = gameMaps.get(mapName);
+            if (map != null) {
+              Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
+              if (map.locationInMap(flagLocation)) {
+                map.setTeamBFlagLocation(flagLocation);
+                player.sendMessage("Set" + ChatColor.BLUE + " Team B " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
+              } else {
+                player.sendMessage("Flag Location must be in Map Boundary");
+              }
             }
           }
         }

@@ -80,16 +80,19 @@ public class LobbyManager implements Listener, CommandExecutor {
       } 
     }
 
-    public void joinLobby(Lobby lobby, Player player) {
-      lobby.addPlayer(player);
-      for(Lobby oldLobby: lobbies.values()) {
-        if (oldLobby != lobby) {
-          oldLobby.removePlayer(player);
-          if (oldLobby != getMainLobby() && oldLobby.getPlayers().size() == 0) {
-            lobbies.remove(oldLobby.getLobbyName());
+    public String joinLobby(Lobby lobby, Player player) {
+      String playerJoinMessage = lobby.addPlayer(player);
+      if (lobby.hasPlayer(player)) {
+        for(Lobby oldLobby: lobbies.values()) {
+          if (oldLobby != lobby) {
+            oldLobby.removePlayer(player);
+            if (oldLobby != getMainLobby() && oldLobby.getPlayers().size() == 0) {
+              lobbies.remove(oldLobby.getLobbyName());
+            }
           }
         }
       }
+      return playerJoinMessage;
     }
 
     public void cleanupLobbies() {
@@ -149,7 +152,8 @@ public class LobbyManager implements Listener, CommandExecutor {
                 Player playerCmdSender = (Player) sender;
                 Lobby lobby = lobbies.get(args[1]);
                 if (lobby != null) {
-                  joinLobby(lobby, playerCmdSender);
+                  String lobbyJoinMessage = joinLobby(lobby, playerCmdSender);
+                  playerCmdSender.sendMessage(lobbyJoinMessage);
                   return true;
                 }  else {
                   playerCmdSender.sendMessage("[EggSplosion] Lobby " + args[0] + " does not exist");
