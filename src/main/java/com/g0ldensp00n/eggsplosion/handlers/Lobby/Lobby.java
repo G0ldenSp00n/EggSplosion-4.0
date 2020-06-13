@@ -73,14 +73,11 @@ public class Lobby {
       while (playersToAdd.size() > 0) {
         Integer nextPlayer = random.nextInt(playersToAdd.size());
         Player player = playersToAdd.get(nextPlayer);
+        Bukkit.getLogger().info("" + teamA);
         if (teamA) {
-          player.setDisplayName(ChatColor.RED + player.getDisplayName() + ChatColor.RESET);
-          scoreManager.getTeamA().addEntry(player.getDisplayName());
-          scoreManager.getTeamA().addPlayer((OfflinePlayer) player);
+          scoreManager.getTeamA().addEntry(player.getName());;
         } else {
-          player.setDisplayName(ChatColor.BLUE + player.getDisplayName() + ChatColor.RESET);
-          scoreManager.getTeamB().addEntry(player.getDisplayName());
-          scoreManager.getTeamB().addPlayer((OfflinePlayer) player);
+          scoreManager.getTeamB().addEntry(player.getName());;
         }
         teamA = !teamA;
         playersToAdd.remove(player);
@@ -91,13 +88,13 @@ public class Lobby {
   public void playerWon(Player player) {
     scoreManager.scoreFreeze();
     if (this.scoreManager.getScoreType() == ScoreType.SOLO) {
-      broadcastMessage(ChatColor.GOLD + player.getDisplayName() + " has won the game!");
+      broadcastMessage(ChatColor.GOLD + scoreManager.getPlayerDisplayName(player) + " has won the game!");
       player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
     } else if (this.scoreManager.getScoreType() == ScoreType.TEAM) {
       Team playerTeam = this.scoreManager.getPlayerTeam(player);
-      broadcastMessage(ChatColor.GOLD + playerTeam.getDisplayName() + ChatColor.GOLD + " has won the game!");
+      broadcastMessage(ChatColor.GOLD + scoreManager.getPlayerDisplayName(player) + ChatColor.GOLD + " has won the game!");
       for(Player playerOnTeam : getPlayers()) {
-        if (playerTeam.hasEntry(playerOnTeam.getDisplayName())) {
+        if (playerTeam.equals(scoreManager.getPlayerTeam(playerOnTeam))) {
           playerOnTeam.playSound(playerOnTeam.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
         }
       }
@@ -121,11 +118,9 @@ public class Lobby {
 
   public String addPlayer(Player player) {
     if (maxPlayers == -1 || playersInLobby.size() <= maxPlayers) {
-      if (getGameMode() == GameMode.WAITING) {
+      if (getGameMode() == GameMode.WAITING || getGameMode() == GameMode.LOBBY) {
         playersInLobby.add(player);
-        if (!readyPlayers.containsKey(player)) {
-          readyPlayers.put(player, false);
-        }
+        unreadyPlayer(player);
         equipPlayer(player);
         if (lobbyName != "MAIN_LOBBY") {
           Location spawnPoint = this.currentMap.getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.SOLO);
@@ -252,7 +247,7 @@ public class Lobby {
     if (scoreManager != null) {
       if (scoreManager.getTeamA().getEntries().size() > 0) {
         for (Player player: getPlayers()) {
-          player.setDisplayName(player.getDisplayName().substring(2, player.getDisplayName().length() - 2));
+          player.setDisplayName(player.getName());
         }
       }
     }
@@ -260,24 +255,19 @@ public class Lobby {
     for(Player player : getPlayers()) {
       Scoreboard gameScoreboard = scoreManager.getScoreboard();
       player.setScoreboard(gameScoreboard);
-      if (scoreManager.getScoreType() == ScoreType.SOLO) {
-        gameScoreboard.getObjective("score").getScore(player.getDisplayName()).setScore(0);
-      } else if (scoreManager.getScoreType() == ScoreType.TEAM) {
-        gameScoreboard.getObjective("score").getScore(scoreManager.getTeamA().getDisplayName()).setScore(0);
-        gameScoreboard.getObjective("score").getScore(scoreManager.getTeamB().getDisplayName()).setScore(0);
-      }
+      scoreManager.initializeScorePlayer(player);
     }
   } 
 
   public void loadWaiting() {
     setGameMode(GameMode.WAITING);
     setMap(mapManager.getMapByName("WAITING_ROOM"), ScoreType.SOLO);
+    for (Player player: getPlayers()) {
+      unreadyPlayer(player);
+    }
     if (scoreManager != null) {
-      if (scoreManager.getTeamA().getEntries().size() > 0) {
-        for (Player player: getPlayers()) {
-          player.setDisplayName(player.getDisplayName().substring(2, player.getDisplayName().length() - 2));
-          player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-        }
+      for (Player player: getPlayers()) {
+        player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
       }
     }
   }
@@ -292,16 +282,16 @@ public class Lobby {
 
     switch(gameMode) {
       case DEATH_MATCH:
-        setScoreManager(new ScoreManager(15, ScoreType.SOLO, this));
+        setScoreManager(new ScoreManager(15, ScoreType.SOLO, this, "", ""));
         setMap(mapManager.getMapByName(mapName), ScoreType.SOLO);
         break;
       case TEAM_DEATH_MATCH:
-        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this));
+        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this, "" + ChatColor.RED, "" + ChatColor.BLUE));
         randomizeTeams();
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         break;
       case CAPTURE_THE_FLAG:
-        setScoreManager(new ScoreManager(3, ScoreType.TEAM, this));
+        setScoreManager(new ScoreManager(3, ScoreType.TEAM, this, "" + ChatColor.RED, "" + ChatColor.BLUE));
         randomizeTeams();
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         this.currentMap.spawnFlags();
@@ -424,9 +414,10 @@ public class Lobby {
           equipWeapons(player);
 
           if (scoreManager != null) {
-            if (scoreManager.getTeamA().hasEntry(player.getDisplayName())) {
+            if (scoreManager.getPlayerTeam(player).equals(scoreManager.getTeamA())) {
+              Bukkit.getLogger().info("equiping team a");
               equipArmor(player, Color.fromRGB(11546150));
-            } else if (scoreManager.getTeamB().hasEntry(player.getDisplayName())) {
+            } else if (scoreManager.getPlayerTeam(player).equals(scoreManager.getTeamB())) {
               equipArmor(player, Color.fromRGB(3949738));
             }
           }
@@ -487,9 +478,9 @@ public class Lobby {
         player.teleport(spawnPoint);
       } else if (scoreType == ScoreType.TEAM) {
         Location spawnPoint = null;
-        if (scoreManager.getTeamA().hasEntry(player.getDisplayName())) {
+        if (scoreManager.getTeamA().hasEntry(player.getName())) {
           spawnPoint = this.getMap().getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.TEAM_A);
-        } else if (scoreManager.getTeamB().hasEntry(player.getDisplayName())) {
+        } else if (scoreManager.getTeamB().hasEntry(player.getName())) {
           spawnPoint = this.getMap().getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.TEAM_B);
         }
 
@@ -515,8 +506,8 @@ public class Lobby {
   private void removePlayerCleanup(Player player) {
     if (scoreManager != null) {
       player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-      if (scoreManager.getTeamA().hasEntry(player.getDisplayName()) || scoreManager.getTeamB().hasEntry(player.getDisplayName())) {
-        player.setDisplayName(player.getDisplayName().substring(2, player.getDisplayName().length() - 2));
+      if (scoreManager.getTeamA().hasEntry(player.getName()) || scoreManager.getTeamB().hasEntry(player.getName())) {
+        player.setDisplayName(player.getName());
       }
     }
   }

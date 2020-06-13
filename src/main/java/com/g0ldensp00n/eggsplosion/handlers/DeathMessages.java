@@ -54,7 +54,7 @@ public class DeathMessages implements Listener {
 
             Random random = new Random();
             String deathMessage = deathMessagesPlayerOnPlayer.get(random.nextInt(deathMessagesPlayerOnPlayer.size()));
-            damagerLobby.broadcastMessage(player.getDisplayName() + " " + deathMessage + " " + damager.getDisplayName());
+            damagerLobby.broadcastMessage(damagerLobby.getScoreboardManager().getPlayerDisplayName(player) + " " + deathMessage + " " + damagerLobby.getScoreboardManager().getPlayerDisplayName(damager));
           } else {
             damager.playSound(damager.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1, 1);
           }

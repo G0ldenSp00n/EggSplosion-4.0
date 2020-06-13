@@ -29,25 +29,27 @@ public class GameModeListeners implements Listener {
     Lobby playerLobby = lobbyManager.getPlayersLobby(player);
     if (playerLobby != null && playerLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
       if (playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-        playerInteractEvent.setCancelled(true);
         Block clickedBlock = playerInteractEvent.getClickedBlock();
         Location locationBelowClickedBlock = playerInteractEvent.getClickedBlock().getLocation().clone();
         Block blockBelowClickedBlock = locationBelowClickedBlock.getBlock();
-        if (playerLobby.getScoreboardManager().getTeamA().hasEntry(player.getDisplayName())) {
+        ScoreManager scoreManager = playerLobby.getScoreboardManager();
+        if (scoreManager.getPlayerTeam(player).equals(scoreManager.getTeamA())) {
           if (clickedBlock.getType().equals(Material.BLUE_BANNER) || blockBelowClickedBlock.getType().equals(Material.BLUE_BANNER)) {
+            playerInteractEvent.setCancelled(true);
             ItemStack blueFlag = new ItemStack(Material.BLUE_BANNER);
             player.getInventory().setHelmet(blueFlag);
             clickedBlock.setType(Material.AIR);
-            playerLobby.broadcastMessage(player.getDisplayName() + " has picked up the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
+            playerLobby.broadcastMessage(scoreManager.getPlayerDisplayName(player) + " has picked up the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
           }
         }
 
-        if (playerLobby.getScoreboardManager().getTeamB().hasEntry(player.getDisplayName())) {
+        if (scoreManager.getPlayerTeam(player).equals(scoreManager.getTeamB())) {
           if (clickedBlock.getType().equals(Material.RED_BANNER) || blockBelowClickedBlock.getType().equals(Material.RED_BANNER)) {
+            playerInteractEvent.setCancelled(true);
             ItemStack redFlag = new ItemStack(Material.RED_BANNER);
             player.getInventory().setHelmet(redFlag);
             clickedBlock.setType(Material.AIR);
-            playerLobby.broadcastMessage(player.getDisplayName() + " has picked up the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
+            playerLobby.broadcastMessage(scoreManager.getPlayerDisplayName(player) + " has picked up the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
           }
         }
       }
@@ -66,7 +68,7 @@ public class GameModeListeners implements Listener {
           playerFlagLocation.add(0, 1, 0);
           if (player.getLocation().distance(playerFlagLocation) < 5 && playerFlagLocation.getBlock().getType().equals(Material.BLUE_BANNER)) {
             playerLobby.equipPlayer(player);
-            playerLobby.broadcastMessage(player.getDisplayName() + " has captured the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
+            playerLobby.broadcastMessage(playerLobby.getScoreboardManager().getPlayerDisplayName(player) + " has captured the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
             playerLobby.getMap().respawnFlag(Team.TEAM_A);
             playerLobby.getScoreboardManager().addScorePlayer(player);
           }
@@ -75,7 +77,7 @@ public class GameModeListeners implements Listener {
           playerFlagLocation.add(0, 1, 0);
           if (player.getLocation().distance(playerFlagLocation) < 5 && playerFlagLocation.getBlock().getType().equals(Material.RED_BANNER)) {
             playerLobby.equipPlayer(player);
-            playerLobby.broadcastMessage(player.getDisplayName() + " has captured the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
+            playerLobby.broadcastMessage(playerLobby.getScoreboardManager().getPlayerDisplayName(player) + " has captured the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
             playerLobby.getMap().respawnFlag(Team.TEAM_B);
             playerLobby.getScoreboardManager().addScorePlayer(player);
           }

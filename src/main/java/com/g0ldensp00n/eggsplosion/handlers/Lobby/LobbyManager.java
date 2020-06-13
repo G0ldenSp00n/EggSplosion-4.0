@@ -16,7 +16,8 @@ import org.bukkit.plugin.Plugin;
 
 public class LobbyManager implements Listener, CommandExecutor {
   private Plugin plugin;
-  private Hashtable<String, Lobby> lobbies = new Hashtable<String, Lobby>();
+  private Hashtable<String, Lobby> lobbies;
+  private Lobby mainLobby;
   private MapManager mapManager;
   private static LobbyManager lobbyManager;
 
@@ -30,12 +31,12 @@ public class LobbyManager implements Listener, CommandExecutor {
     public LobbyManager(Plugin plugin, MapManager mapManager) {
       this.plugin = plugin;
       this.mapManager = mapManager;
+      this.lobbies = new Hashtable<String, Lobby>();
       
       Bukkit.getPluginManager().registerEvents(this, plugin);
+      mainLobby = new Lobby(plugin, mapManager, "MAIN_LOBBY", GameMode.LOBBY, -1, null);
       if (Bukkit.getOnlinePlayers().size() > 0) {
-        this.addLobby(GameMode.LOBBY, -1, "MAIN_LOBBY", null).addPlayers(Bukkit.getOnlinePlayers());
-      } else {
-        this.addLobby(GameMode.LOBBY, -1, "MAIN_LOBBY", null);
+        mainLobby.addPlayers(Bukkit.getOnlinePlayers());
       }
     }
 
@@ -52,7 +53,7 @@ public class LobbyManager implements Listener, CommandExecutor {
     }
 
     public Lobby getMainLobby() {
-      return lobbies.get("MAIN_LOBBY");
+      return mainLobby;
     }
 
     public Lobby addLobby(GameMode gameMode, Integer maxPlayers, String lobbyName, GameMap map) {
@@ -62,8 +63,8 @@ public class LobbyManager implements Listener, CommandExecutor {
     }
 
     public void closeLobby(String lobbyName) {
-      if (lobbyName != "MAIN_LOBBY") {
-        Lobby lobbyToRemove = lobbies.get(lobbyName);
+      Lobby lobbyToRemove = lobbies.get(lobbyName);
+      if (lobbyToRemove != null) {
         List<Player> playersInLobby = lobbyToRemove.getPlayers();
         this.getMainLobby().addPlayers(playersInLobby);
         lobbies.remove(lobbyName);
@@ -83,12 +84,12 @@ public class LobbyManager implements Listener, CommandExecutor {
     public String joinLobby(Lobby lobby, Player player) {
       String playerJoinMessage = lobby.addPlayer(player);
       if (lobby.hasPlayer(player)) {
-        for(Lobby oldLobby: lobbies.values()) {
-          if (oldLobby != lobby) {
-            oldLobby.removePlayer(player);
-            if (oldLobby != getMainLobby() && oldLobby.getPlayers().size() == 0) {
-              lobbies.remove(oldLobby.getLobbyName());
-            }
+        List<Lobby> oldLobbies = new ArrayList<Lobby>(lobbies.values());
+        oldLobbies.remove(lobby);
+        for(Lobby oldLobby: oldLobbies) {
+          oldLobby.removePlayer(player);
+          if (oldLobby != getMainLobby() && oldLobby.getPlayers().size() == 0) {
+            lobbies.remove(oldLobby.getLobbyName());
           }
         }
       }
@@ -103,9 +104,7 @@ public class LobbyManager implements Listener, CommandExecutor {
         }
       }
 
-      Lobby mainLobby = getMainLobby();
       lobbies = new Hashtable<>();
-      lobbies.put("MAIN_LOBBY", mainLobby);
     }
 
 
@@ -122,7 +121,7 @@ public class LobbyManager implements Listener, CommandExecutor {
         getMainLobby().removePlayer(player);
       } else {
         Lobby playerLobby = getPlayersLobby(player);
-        if (playerLobby.getLobbyName() != "MAIN_LOBBY" && !playerLobby.anyOnlinePlayersExcluding(player)) {
+        if (playerLobby != null && playerLobby != getMainLobby() && !playerLobby.anyOnlinePlayersExcluding(player)) {
           playerLobby.removeAllPlayers();
           lobbies.remove(playerLobby.getLobbyName());
         }
@@ -180,19 +179,15 @@ public class LobbyManager implements Listener, CommandExecutor {
             case "list":
               String lobbiesList = "[EggSplosion] Current Lobbies - ";
               Iterator<String> lobbiesIterator = lobbies.keys().asIterator();
-              Boolean foundLobby = false;
               while (lobbiesIterator.hasNext()) {
                 String nextLobby = lobbiesIterator.next();
-                if (nextLobby != "MAIN_LOBBY") {
-                  lobbiesList += ChatColor.AQUA + nextLobby + ChatColor.RESET;
-                  if (lobbiesIterator.hasNext()) {
-                    lobbiesList += ", ";
-                  }
-                  foundLobby = true;
+                lobbiesList += ChatColor.AQUA + nextLobby + ChatColor.RESET;
+                if (lobbiesIterator.hasNext()) {
+                  lobbiesList += ", ";
                 }
               }
 
-              if (foundLobby) {
+              if (lobbies.size() > 0) {
                 sender.sendMessage(lobbiesList);
               } else {
                 sender.sendMessage("[EggSplosion] No Game Lobbies Currently Exist, create one with /lobby create <name>");

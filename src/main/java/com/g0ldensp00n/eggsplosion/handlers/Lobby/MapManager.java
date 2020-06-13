@@ -49,17 +49,18 @@ public class MapManager implements Listener, CommandExecutor {
   }
 
   private List<Location> convertToLocationList(List<?> list) {
-    Iterator<?> listIterator = list.iterator();
     List<Location> locationList = new ArrayList<>();
-    while(listIterator.hasNext()) {
-      try {
-        Location loc = (Location) listIterator.next();
-        locationList.add(loc);
-      } catch (ClassFormatError e) {
-        // Suppress
+    if (list != null) { 
+      Iterator<?> listIterator = list.iterator();
+      while(listIterator.hasNext()) {
+        try {
+          Location loc = (Location) listIterator.next();
+          locationList.add(loc);
+        } catch (ClassFormatError e) {
+          // Suppress
+        }
       }
     }
-
     return locationList;
   }
 
@@ -96,13 +97,33 @@ public class MapManager implements Listener, CommandExecutor {
         File mapFile = new File(pluginFolder, "map/" + mapName + ".yaml");
         FileConfiguration mapConfigFile = YamlConfiguration.loadConfiguration(mapFile);
 
-        mapConfigFile.set("cornerA", map.getCornerA());
-        mapConfigFile.set("cornerB", map.getCornerB());
-        mapConfigFile.set("teamAFlagLocation", map.getTeamAFlagLocation());
-        mapConfigFile.set("teamBFlagLocation", map.getTeamBFlagLocation());
-        mapConfigFile.set("soloSpawnLocations", map.getSoloSpawnLocations());
-        mapConfigFile.set("teamASpawnLocations", map.getTeamASpawnLocations());
-        mapConfigFile.set("teamBSpawnLocations", map.getTeamBSpawnLocations());
+        if (map.getCornerA() != null) {
+          mapConfigFile.set("cornerA", map.getCornerA());
+        }
+
+        if (map.getCornerB() != null) {
+          mapConfigFile.set("cornerB", map.getCornerB());
+        }
+
+        if (map.getTeamAFlagLocation() != null) {
+          mapConfigFile.set("teamAFlagLocation", map.getTeamAFlagLocation());
+        }
+
+        if (map.getTeamBFlagLocation() != null) {
+          mapConfigFile.set("teamBFlagLocation", map.getTeamBFlagLocation());
+        }
+
+        if (map.getSoloSpawnLocations() != null) {
+          mapConfigFile.set("soloSpawnLocations", map.getSoloSpawnLocations());
+        }
+
+        if (map.getTeamAFlagLocation() != null) {
+          mapConfigFile.set("teamASpawnLocations", map.getTeamASpawnLocations());
+        }
+
+        if (map.getTeamBFlagLocation() != null) {
+          mapConfigFile.set("teamBSpawnLocations", map.getTeamBSpawnLocations());
+        }
 
         try {
           mapConfigFile.save(mapFile);
@@ -135,7 +156,7 @@ public class MapManager implements Listener, CommandExecutor {
   public void playerMoveEvent(PlayerMoveEvent playerMoveEvent) {
     Player player = playerMoveEvent.getPlayer();
     Lobby playerLobby = lobbyManager.getPlayersLobby(player);
-    if (playerLobby != lobbyManager.getMainLobby()) {
+    if (playerLobby != null && playerLobby != lobbyManager.getMainLobby()) {
       if (playerLobby.getMap() != null) {
         if (! playerLobby.getMap().locationInMap(playerMoveEvent.getTo())) {
           playerMoveEvent.setCancelled(true);
@@ -149,7 +170,7 @@ public class MapManager implements Listener, CommandExecutor {
     Player player = playerTeleportEvent.getPlayer();
     Lobby playerLobby = lobbyManager.getPlayersLobby(player);
 
-    if (playerLobby != lobbyManager.getMainLobby()) {
+    if (playerLobby != null && playerLobby != lobbyManager.getMainLobby()) {
       if (playerLobby.getMap() != null) {
         if (! playerLobby.getMap().locationInMap(playerTeleportEvent.getTo())) {
           playerTeleportEvent.setCancelled(true);
@@ -161,7 +182,7 @@ public class MapManager implements Listener, CommandExecutor {
 
   @EventHandler
   public void playerUseMappingTools(PlayerInteractEvent playerInteractEvent) {
-    if (playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_AIR) || playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+    if (playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
       ItemStack mappingTool = playerInteractEvent.getItem();
       Player player = playerInteractEvent.getPlayer();
       if (mappingTool != null) {

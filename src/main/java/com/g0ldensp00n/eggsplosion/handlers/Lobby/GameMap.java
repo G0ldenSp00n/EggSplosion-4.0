@@ -163,11 +163,15 @@ public class GameMap {
       Integer spawnInt = random.nextInt(soloSpawnLocations.size());
       spawnPoint = soloSpawnLocations.get(spawnInt);
     } else if (team == Team.TEAM_A) {
-      Integer spawnInt = random.nextInt(teamASpawnLocations.size());
-      spawnPoint = teamASpawnLocations.get(spawnInt);
+      if (teamASpawnLocations.size() > 0) {
+        Integer spawnInt = random.nextInt(teamASpawnLocations.size());
+        spawnPoint = teamASpawnLocations.get(spawnInt);
+      }
     } else if (team == Team.TEAM_B) {
-      Integer spawnInt = random.nextInt(teamBSpawnLocations.size());
-      spawnPoint = teamBSpawnLocations.get(spawnInt);
+      if (teamBSpawnLocations.size() > 0) {
+        Integer spawnInt = random.nextInt(teamBSpawnLocations.size());
+        spawnPoint = teamBSpawnLocations.get(spawnInt);
+      }
     }
 
     if (spawnPoint != null) {
