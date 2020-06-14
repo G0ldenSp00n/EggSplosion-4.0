@@ -7,23 +7,30 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -31,16 +38,21 @@ import org.bukkit.plugin.Plugin;
 
 public class MapManager implements Listener, CommandExecutor {
   private ItemStack Map_Tool_boundary;
-  private Map<Player, List<Location>> boundaryToolTracker = new Hashtable<>();
-  private Map<String, GameMap> gameMaps = new Hashtable<>();
+  private Map<Player, List<Location>> boundaryToolTracker;
+  private Map<String, GameMap> gameMaps;
+  private Map<String, Inventory> gameMapEquipment;
   private String pluginFolder;
   private LobbyManager lobbyManager;
+  private ItemStack disabledSlot;
 
   public MapManager(Plugin plugin, String pluginFolder) {
     this.lobbyManager = LobbyManager.getInstance(plugin, this);
     this.pluginFolder = pluginFolder;
     Bukkit.getPluginManager().registerEvents(this, plugin);
 
+    boundaryToolTracker = new Hashtable<>();
+    gameMaps = new Hashtable<>();
+    gameMapEquipment = new Hashtable<>();
     loadMapsFromFiles();
   }
 
@@ -84,6 +96,39 @@ public class MapManager implements Listener, CommandExecutor {
         List<Location> teamBSpawnLocations = convertToLocationList(teamBSpawnItems);
         map.loadMapFromFile(soloSpawnLocations, teamASpawnLocations, teamBSpawnLocations, mapConfigFile.getLocation("teamAFlagLocation"), mapConfigFile.getLocation("teamBFlagLocation"));
 
+        ItemStack helmet = mapConfigFile.getItemStack("helmet");
+        ItemStack chestplate = mapConfigFile.getItemStack("chestplate");
+        ItemStack leggings = mapConfigFile.getItemStack("leggings");
+        ItemStack boots = mapConfigFile.getItemStack("boots");
+
+        if (helmet != null || chestplate != null || leggings != null || boots != null) {
+          Inventory mapEquipmentMenu = Bukkit.createInventory(null, InventoryType.HOPPER, "Player Equipment Menu");
+          
+          disabledSlot = createMapTool(Material.RED_STAINED_GLASS_PANE, "Disabled");
+          mapEquipmentMenu.setItem(4, disabledSlot);
+          gameMapEquipment.put(fileName, mapEquipmentMenu);
+
+          if (helmet != null) {
+            map.setHelmet(helmet);
+            mapEquipmentMenu.setItem(0, helmet);
+          }
+
+          if (chestplate != null) {
+            map.setChestplate(chestplate);
+            mapEquipmentMenu.setItem(1, chestplate);
+          }
+
+          if (leggings != null) {
+            map.setLeggings(leggings);
+            mapEquipmentMenu.setItem(2, leggings);
+          }
+
+          if (boots != null) {
+            map.setBoots(boots);
+            mapEquipmentMenu.setItem(3, boots);
+          }
+        }
+
         gameMaps.put(fileName, map);
       }
     }
@@ -123,6 +168,22 @@ public class MapManager implements Listener, CommandExecutor {
 
         if (map.getTeamBFlagLocation() != null) {
           mapConfigFile.set("teamBSpawnLocations", map.getTeamBSpawnLocations());
+        }
+
+        if (map.getHelmet() != null) {
+          mapConfigFile.set("helmet", map.getHelmet());
+        }
+        
+        if (map.getChestplate() != null) {
+          mapConfigFile.set("chestplate", map.getChestplate());
+        }
+
+        if (map.getLeggings() != null) {
+          mapConfigFile.set("leggings", map.getLeggings());
+        }
+
+        if (map.getBoots() != null) {
+          mapConfigFile.set("boots", map.getBoots());
         }
 
         try {
@@ -285,6 +346,43 @@ public class MapManager implements Listener, CommandExecutor {
     }
   }
 
+  @EventHandler
+  public void playerInteractEvent(InventoryClickEvent inventoryClickEvent) {
+    HumanEntity humanEntity = inventoryClickEvent.getWhoClicked();
+    if (humanEntity instanceof Player) {
+      Player player = (Player) humanEntity;
+      if (inventoryClickEvent.getView().getTitle().equals("Player Equipment Menu")) {
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+        if (inventoryClickEvent.getCurrentItem().equals(disabledSlot)) {
+          inventoryClickEvent.setCancelled(true);
+        }
+      }
+    }
+  }
+
+  @EventHandler
+  public void playerCloseEvent(InventoryCloseEvent inventoryCloseEvent) {
+    if (inventoryCloseEvent.getView().getTitle().equals("Player Equipment Menu")) {
+      String mapName = null;
+      for(Entry<String, Inventory> entry : gameMapEquipment.entrySet()) {
+        if (entry.getValue().equals(inventoryCloseEvent.getInventory())) {
+          mapName = entry.getKey();
+        }
+      }
+
+      if (mapName != null) {
+        GameMap gameMap = gameMaps.get(mapName);
+        if (gameMap != null) {
+          for (Integer i = 0; i < 4; i++) {
+            if (inventoryCloseEvent.getInventory().getItem(i) != null) {
+              gameMap.setArmor(i, inventoryCloseEvent.getInventory().getItem(i));
+            }
+          }
+        }
+      }
+    }
+  }
+
   @Override
   public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
     if (commandLabel.equalsIgnoreCase("map")) {
@@ -315,8 +413,6 @@ public class MapManager implements Listener, CommandExecutor {
                 player.getInventory().setItem(5, Map_Tool_flagSpawnTeamA);
                 player.getInventory().setItem(6, Map_Tool_flagSpawnTeamB);
 
-
-                player.sendMessage("Select the boudrys of the map by right clicking the shovel, then run the command /map create <mapName>");
                 return true;
               }
             } else {
@@ -327,7 +423,7 @@ public class MapManager implements Listener, CommandExecutor {
                 Map_Tool_boundary = createMapTool(Material.WOODEN_SHOVEL, "Boundary Tool");
                 player.getInventory().addItem(Map_Tool_boundary);
 
-                player.sendMessage("Select the boudrys of the map by right clicking the shovel, then run the command /map create <mapName>");
+                player.sendMessage("[EggSplosion] Select the boudarys of the map by right clicking the shovel, then run the command /map create <mapName>");
                 return true;
               }
             }
@@ -348,6 +444,27 @@ public class MapManager implements Listener, CommandExecutor {
               }
             }
             break;
+          case "equip":
+            if (args.length > 1) {
+              GameMap map = gameMaps.get(args[1]);
+              if (map != null && sender instanceof Player) {
+                Player player = (Player) sender;
+                Inventory mapEquipmentMenu;
+                if (gameMapEquipment.get(args[1]) != null) {
+                  mapEquipmentMenu = gameMapEquipment.get(args[1]);
+                } else {
+                  mapEquipmentMenu = Bukkit.createInventory(null, InventoryType.HOPPER, "Player Equipment Menu");
+                  
+                  disabledSlot = createMapTool(Material.RED_STAINED_GLASS_PANE, "Disabled");
+                  mapEquipmentMenu.setItem(4, disabledSlot);
+                  gameMapEquipment.put(args[1], mapEquipmentMenu);
+                }
+
+                player.openInventory(mapEquipmentMenu);
+              } else {
+                sender.sendMessage("[EggSplosion] Map doesn't exists, create it to set its equipment");
+              }
+            }
         }
       }
     }

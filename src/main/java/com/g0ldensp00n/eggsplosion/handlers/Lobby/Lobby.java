@@ -373,35 +373,81 @@ public class Lobby {
   }
 
   public void equipArmor(Player player, Color color) {
-    ItemStack leatherHelmet = new ItemStack(Material.LEATHER_HELMET);
-    ItemStack leatherChestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
-    ItemStack leatherLeggings = new ItemStack(Material.LEATHER_LEGGINGS);
-    ItemStack leatherBoots = new ItemStack(Material.LEATHER_BOOTS);
+    ItemStack helmet = null;
+    ItemStack chestplate = null;
+    ItemStack leggings = null;
+    ItemStack boots = null;
 
-    LeatherArmorMeta leatherHelmetMeta = (LeatherArmorMeta) leatherHelmet.getItemMeta();
-    LeatherArmorMeta leatherChestplateMeta = (LeatherArmorMeta) leatherChestplate.getItemMeta();
-    LeatherArmorMeta leatherLeggingsMeta = (LeatherArmorMeta) leatherLeggings.getItemMeta();
-    LeatherArmorMeta leatherBootsMeta = (LeatherArmorMeta) leatherBoots.getItemMeta(); 
+    GameMap gameMap = getMap();
+    if (gameMap != null) {
+      if (gameMap.getHelmet() != null) {
+        helmet = gameMap.getHelmet();
+      }
 
-    leatherHelmetMeta.setColor(color);
-    leatherChestplateMeta.setColor(color);
-    leatherLeggingsMeta.setColor(color);
-    leatherBootsMeta.setColor(color);
-    
-    leatherHelmet.setItemMeta(leatherHelmetMeta);
-    leatherChestplate.setItemMeta(leatherChestplateMeta);
-    leatherLeggings.setItemMeta(leatherLeggingsMeta);
-    leatherBoots.setItemMeta(leatherLeggingsMeta);
+      if (gameMap.getChestplate() != null) {
+        chestplate = gameMap.getChestplate();
+      }
 
-    player.getInventory().setHelmet(leatherHelmet);
-    player.getInventory().setChestplate(leatherChestplate);
-    player.getInventory().setLeggings(leatherLeggings);
-    player.getInventory().setBoots(leatherBoots);
+      if (gameMap.getLeggings() != null) {
+        leggings = gameMap.getLeggings();
+      }
+
+      if (gameMap.getBoots() != null) {
+        boots = gameMap.getBoots();
+      }
+    }
+
+    if (helmet == null) {
+      helmet = new ItemStack(Material.LEATHER_HELMET);
+    }
+
+    if (chestplate == null) {
+      chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
+    }
+
+    if (leggings == null) {
+      leggings = new ItemStack(Material.LEATHER_LEGGINGS);
+    }
+
+    if (boots == null) {
+      boots = new ItemStack(Material.LEATHER_BOOTS);
+    }
+
+    if (helmet.getItemMeta() instanceof LeatherArmorMeta) {
+      LeatherArmorMeta leatherHelmetMeta = (LeatherArmorMeta) helmet.getItemMeta();
+      leatherHelmetMeta.setColor(color);
+      helmet.setItemMeta(leatherHelmetMeta);
+    }
+
+    if (chestplate.getItemMeta() instanceof LeatherArmorMeta) {
+      LeatherArmorMeta leatherChestplateMeta = (LeatherArmorMeta) chestplate.getItemMeta();
+      leatherChestplateMeta.setColor(color);
+      chestplate.setItemMeta(leatherChestplateMeta);
+    }
+
+    if (leggings.getItemMeta() instanceof LeatherArmorMeta) {
+      LeatherArmorMeta leatherLeggingsMeta = (LeatherArmorMeta) leggings.getItemMeta();
+      leatherLeggingsMeta.setColor(color);
+      leggings.setItemMeta(leatherLeggingsMeta);
+    }
+
+    if (boots.getItemMeta() instanceof LeatherArmorMeta) {
+      LeatherArmorMeta leatherBootsMeta = (LeatherArmorMeta) boots.getItemMeta(); 
+      leatherBootsMeta.setColor(color);
+      boots.setItemMeta(leatherBootsMeta);
+    }
+
+    player.getInventory().setHelmet(helmet);
+    player.getInventory().setChestplate(chestplate);
+    player.getInventory().setLeggings(leggings);
+    player.getInventory().setBoots(boots);
   }
 
   public void equipPlayer(Player player) {
     if (playersInLobby.contains(player)) {
-      player.getInventory().clear();
+      if (getGameMode() != GameMode.LOBBY) {
+        player.getInventory().clear();
+      }
       switch (currentGamemode) {
         case WAITING: {
           ItemStack item = new ItemStack(Material.EMERALD);

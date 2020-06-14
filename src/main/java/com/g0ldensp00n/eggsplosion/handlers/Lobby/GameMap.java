@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class GameMap {
   private Location cornerA;
@@ -19,6 +20,10 @@ public class GameMap {
   private List<GameMode> supportedGameModes;
   private Location teamAFlagLocation;
   private Location teamBFlagLocation;
+  private ItemStack helmet;
+  private ItemStack chestplate;
+  private ItemStack leggings;
+  private ItemStack boots;
 
   public GameMap(Location cornerA, Location cornerB) {
     this.cornerA = cornerA;
@@ -37,6 +42,62 @@ public class GameMap {
 
   public Location getCornerB() {
     return cornerB;
+  }
+
+  public ItemStack getHelmet() {
+    if (helmet != null) {
+      return helmet.clone();
+    }
+    return null;
+  }
+
+  public ItemStack getChestplate() {
+    if (chestplate != null) {
+      return chestplate.clone();
+    }
+    return null;
+  }
+
+  public ItemStack getLeggings() {
+    if (leggings != null) {
+      return leggings.clone();
+    }
+    return null;
+  }
+
+  public ItemStack getBoots() {
+    if (boots != null) {
+      return boots.clone();
+    }
+    return null;
+  }
+
+  public void setArmor(Integer slot, ItemStack item) {
+    if (slot == 0) {
+      setHelmet(item);
+    } else if (slot == 1) {
+      setChestplate(item);
+    } else if (slot == 2) {
+      setLeggings(item);
+    } else if (slot == 3){
+      setBoots(item);
+    }
+  }
+
+  public void setHelmet(ItemStack helmet) {
+    this.helmet = helmet;
+  }
+
+  public void setChestplate(ItemStack chestplate) {
+    this.chestplate = chestplate;
+  }
+
+  public void setLeggings(ItemStack leggings) {
+    this.leggings = leggings;
+  }
+
+  public void setBoots(ItemStack boots) {
+    this.boots = boots;
   }
 
   public List<Location> getSoloSpawnLocations() {
