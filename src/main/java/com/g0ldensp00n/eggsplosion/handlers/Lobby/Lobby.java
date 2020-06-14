@@ -103,6 +103,8 @@ public class Lobby {
       for(Player playerOnTeam : getPlayers()) {
         if (playerTeam.equals(scoreManager.getPlayerTeam(playerOnTeam))) {
           playerOnTeam.playSound(playerOnTeam.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
+        } else {
+          playerOnTeam.playSound(playerOnTeam.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1, 1);
         }
       }
     }
