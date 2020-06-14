@@ -75,7 +75,6 @@ public class LobbyManager implements Listener, CommandExecutor {
     public void PlayerLogin(PlayerLoginEvent playerLoginEvent) {
       Player player = playerLoginEvent.getPlayer();
       if (getPlayersLobby(player) == null) {
-        Bukkit.getLogger().info("" + getMainLobby());
         getMainLobby().addPlayer(player);
         getMainLobby().broadcastMessage(player.getDisplayName() + " Joined Lobby");
       } 

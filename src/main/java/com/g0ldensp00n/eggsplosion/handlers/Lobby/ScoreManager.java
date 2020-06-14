@@ -23,7 +23,33 @@ public class ScoreManager {
   private Team teamA;
   private Team teamB;
 
-  public ScoreManager(Integer scoreToWin, ScoreType type, Lobby lobby, String teamAPrefix, String teamBPrefix) {
+  public ScoreManager(Integer scoreToWin, ScoreType type, Lobby lobby, ChatColor teamAColor, ChatColor teamBColor, Boolean hideTeamNameTags) {
+    this(scoreToWin, type, lobby);
+
+    String teamAName = teamAColor.name().substring(0, 1) + teamAColor.name().toLowerCase().substring(1);
+    teamA = scoreboard.registerNewTeam(teamAName + " Team");
+    teamA.setPrefix("" + teamAColor);
+    teamA.setColor(teamAColor);
+    teamA.setDisplayName(teamAColor + teamAName + " Team");
+    if (hideTeamNameTags) {
+      teamA.setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.FOR_OTHER_TEAMS);
+    }
+
+    String teamBName = teamBColor.name().substring(0, 1) + teamBColor.name().toLowerCase().substring(1);
+    teamB = scoreboard.registerNewTeam(teamBName + " Team");
+    teamB.setPrefix("" + teamBColor);
+    teamB.setColor(teamBColor);
+    teamB.setDisplayName(teamBColor + teamBName + " Team");
+    if (hideTeamNameTags) {
+      teamB.setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.FOR_OTHER_TEAMS);
+    }
+  }
+
+  public ScoreManager(ScoreType type, Lobby lobby, ChatColor teamAColor, ChatColor teamBColor, Boolean hideTeamNameTags) {
+    this(-1, type, lobby, teamAColor, teamBColor, hideTeamNameTags);
+  }
+
+  public ScoreManager(Integer scoreToWin, ScoreType type, Lobby lobby) {
     this.scoreToWin = scoreToWin;
     this.scoreType = type;
     this.lobby = lobby;
@@ -31,19 +57,9 @@ public class ScoreManager {
     scoreboardManager = Bukkit.getScoreboardManager();
     scoreboard = scoreboardManager.getNewScoreboard();
     scoreObjective = scoreboard.registerNewObjective("score", "dummy", "Score");
-    scoreObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-    teamA = scoreboard.registerNewTeam("Red Team");
-    teamA.setPrefix(teamAPrefix);
-    teamA.setColor(ChatColor.RED);
-    teamA.setDisplayName(ChatColor.RED + "Red Team");
-    teamA.setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.FOR_OTHER_TEAMS);
-
-    teamB = scoreboard.registerNewTeam("Blue Team");
-    teamB.setPrefix(teamBPrefix);
-    teamB.setColor(ChatColor.BLUE);
-    teamB.setDisplayName(ChatColor.BLUE + "Blue Team");
-    teamB.setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.FOR_OTHER_TEAMS);
+    if (scoreType != ScoreType.TRACKING) {
+      scoreObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+    }
   }
 
   public Team getTeamA() {
@@ -65,6 +81,25 @@ public class ScoreManager {
   public Team getPlayerTeam(Player player) {
     Team playerTeam = scoreboard.getEntryTeam(player.getName());
     return playerTeam;
+  }
+
+  public void setPlayerTeam(Player player, Team team) {
+    if (team == getTeamA()) {
+      if (!getTeamA().equals(getPlayerTeam(player))) {
+        getTeamA().addEntry(player.getName());
+        getTeamB().removeEntry(player.getName());
+      }
+    } else if (team == getTeamB()) {
+      if (!getTeamB().equals(getPlayerTeam(player))) {
+        getTeamB().addEntry(player.getName());
+        getTeamA().removeEntry(player.getName());
+      }
+    }
+  }
+
+  public void setPlayerScoreboard(Player player) {
+      Scoreboard gameScoreboard = getScoreboard();
+      player.setScoreboard(gameScoreboard);
   }
 
   public void scoreFreeze () {
@@ -99,6 +134,8 @@ public class ScoreManager {
           break;
         case INFO:
           break;
+        case TRACKING:
+          break;
       }
 
       if (scoreToWin != -1 && (newScore >= scoreToWin)) {
@@ -122,6 +159,8 @@ public class ScoreManager {
           teamBScore.setScore(0);
           break;
         case INFO:
+          break;
+        case TRACKING:
           break;
       }
     }

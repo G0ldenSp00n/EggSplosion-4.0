@@ -12,7 +12,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -25,10 +24,10 @@ import org.bukkit.scoreboard.Team;
 
 public class Lobby {
   private Plugin plugin;
-  private List<Player> playersInLobby = new ArrayList<>();
-  private Map<Player, GameMode> gameModeVotes = new Hashtable<Player, GameMode>();
-  private Map<Player, String> mapVotes = new Hashtable<Player, String>();
-  private Map<Player, Boolean> readyPlayers = new Hashtable<Player, Boolean>();
+  private List<Player> playersInLobby;
+  private Map<Player, GameMode> gameModeVotes;
+  private Map<Player, String> mapVotes;
+  private Map<Player, Boolean> readyPlayers;
   private GameMode currentGamemode;
   private GameMap currentMap;
   private Integer maxPlayers;
@@ -43,6 +42,15 @@ public class Lobby {
     this.currentGamemode = gameMode;
     this.currentMap = gameMap;
     this.maxPlayers = maxPlayers;
+
+    playersInLobby = new ArrayList<>();
+    gameModeVotes = new Hashtable<Player, GameMode>();
+    mapVotes = new Hashtable<Player, String>();
+    readyPlayers = new Hashtable<Player, Boolean>();
+
+    if (gameMode == GameMode.WAITING) {
+      setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.WHITE, ChatColor.GREEN, false));
+    }
   }
 
   public String getLobbyName() {
@@ -73,7 +81,6 @@ public class Lobby {
       while (playersToAdd.size() > 0) {
         Integer nextPlayer = random.nextInt(playersToAdd.size());
         Player player = playersToAdd.get(nextPlayer);
-        Bukkit.getLogger().info("" + teamA);
         if (teamA) {
           scoreManager.getTeamA().addEntry(player.getName());;
         } else {
@@ -88,11 +95,11 @@ public class Lobby {
   public void playerWon(Player player) {
     scoreManager.scoreFreeze();
     if (this.scoreManager.getScoreType() == ScoreType.SOLO) {
-      broadcastMessage(ChatColor.GOLD + scoreManager.getPlayerDisplayName(player) + " has won the game!");
+      broadcastTitle(scoreManager.getPlayerDisplayName(player), ChatColor.GOLD + " has won the game!", 0, 21, 0);
       player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
     } else if (this.scoreManager.getScoreType() == ScoreType.TEAM) {
       Team playerTeam = this.scoreManager.getPlayerTeam(player);
-      broadcastMessage(ChatColor.GOLD + scoreManager.getPlayerDisplayName(player) + ChatColor.GOLD + " has won the game!");
+      broadcastTitle(scoreManager.getPlayerTeam(player).getDisplayName(), ChatColor.GOLD + " has won the game!", 0, 21, 0);
       for(Player playerOnTeam : getPlayers()) {
         if (playerTeam.equals(scoreManager.getPlayerTeam(playerOnTeam))) {
           playerOnTeam.playSound(playerOnTeam.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1, 1);
@@ -100,7 +107,7 @@ public class Lobby {
       }
     }
     new BukkitRunnable(){
-        Integer countDown = 5;
+        Integer countDown = 6;
 
         @Override
         public void run() {
@@ -108,9 +115,10 @@ public class Lobby {
             cancel();
             loadWaiting();
             return;
+          } else if (countDown <= 5) {
+            broadcastTitle("Return to waiting room", "" + countDown, 0, 21, 0);
           }
-
-          broadcastMessage("Returning to waiting room in " + countDown-- + "...");
+          countDown--;
         }
       }.runTaskTimer(this.plugin, 0, (long) 20);
 
@@ -119,6 +127,9 @@ public class Lobby {
   public String addPlayer(Player player) {
     if (maxPlayers == -1 || playersInLobby.size() <= maxPlayers) {
       if (getGameMode() == GameMode.WAITING || getGameMode() == GameMode.LOBBY) {
+        if (scoreManager != null) {
+          scoreManager.setPlayerScoreboard(player);
+        }
         playersInLobby.add(player);
         unreadyPlayer(player);
         equipPlayer(player);
@@ -245,7 +256,7 @@ public class Lobby {
 
   public void setScoreManager(ScoreManager scoreManager) {
     if (scoreManager != null) {
-      if (scoreManager.getTeamA().getEntries().size() > 0) {
+      if (scoreManager.getTeamA() != null) {
         for (Player player: getPlayers()) {
           player.setDisplayName(player.getName());
         }
@@ -253,8 +264,7 @@ public class Lobby {
     }
     this.scoreManager = scoreManager;
     for(Player player : getPlayers()) {
-      Scoreboard gameScoreboard = scoreManager.getScoreboard();
-      player.setScoreboard(gameScoreboard);
+      scoreManager.setPlayerScoreboard(player);
       scoreManager.initializeScorePlayer(player);
     }
   } 
@@ -265,33 +275,26 @@ public class Lobby {
     for (Player player: getPlayers()) {
       unreadyPlayer(player);
     }
-    if (scoreManager != null) {
-      for (Player player: getPlayers()) {
-        player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-      }
-    }
+    setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.WHITE, ChatColor.GREEN, false));
   }
 
   public void startGame() {
     GameMode gameMode = tallyGameModeVote();
     String mapName = tallyGameMapVote();
-    broadcastMessage("----------------------------");
-    broadcastMessage("GameMode - " + gameModeToString(gameMode));
-    broadcastMessage("Map - " + mapName);
-    broadcastMessage("----------------------------");
+    broadcastTitle(gameModeToString(gameMode), "Map - " + mapName, 10, 60, 10);
 
     switch(gameMode) {
       case DEATH_MATCH:
-        setScoreManager(new ScoreManager(15, ScoreType.SOLO, this, "", ""));
+        setScoreManager(new ScoreManager(2, ScoreType.SOLO, this));
         setMap(mapManager.getMapByName(mapName), ScoreType.SOLO);
         break;
       case TEAM_DEATH_MATCH:
-        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this, "" + ChatColor.RED, "" + ChatColor.BLUE));
+        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
         randomizeTeams();
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         break;
       case CAPTURE_THE_FLAG:
-        setScoreManager(new ScoreManager(3, ScoreType.TEAM, this, "" + ChatColor.RED, "" + ChatColor.BLUE));
+        setScoreManager(new ScoreManager(3, ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
         randomizeTeams();
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         this.currentMap.spawnFlags();
@@ -308,7 +311,6 @@ public class Lobby {
       Boolean allPlayersReady = allPlayersReady();
 
       if (allPlayersReady) {
-        broadcastMessage("All Players Ready!");
         new BukkitRunnable(){
           Integer countDown = 5;
 
@@ -319,9 +321,9 @@ public class Lobby {
               startGame();
               return;
             } if (allPlayersReady()) {
-              broadcastMessage("Game Starting in " + countDown-- + "...");
+              broadcastTitle("Game Starting", ""+countDown--, 0, 21, 0);
             } else {
-              broadcastMessage("Player Unreadied! Cancelling Countdown");
+              broadcastTitle("Game Starting", "Cancelling Player Unreadied", 0, 21, 0);
               cancel();
             }
           }
@@ -336,6 +338,9 @@ public class Lobby {
     for(Player playerInLobby : playersInLobby) {
       playerInLobby.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_AMBIENT, 1, 1);
     }
+    if (scoreManager != null) {
+      getScoreboardManager().setPlayerTeam(player, getScoreboardManager().getTeamB());
+    }
     ifAllPlayersReadyStartGame();
   }
 
@@ -343,6 +348,9 @@ public class Lobby {
     readyPlayers.put(player, false);
     for(Player playerInLobby : playersInLobby) {
       playerInLobby.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_DEATH, 1, 1);
+    }
+    if (scoreManager != null) {
+      getScoreboardManager().setPlayerTeam(player, getScoreboardManager().getTeamA());
     }
   }
 
@@ -415,7 +423,6 @@ public class Lobby {
 
           if (scoreManager != null) {
             if (scoreManager.getPlayerTeam(player).equals(scoreManager.getTeamA())) {
-              Bukkit.getLogger().info("equiping team a");
               equipArmor(player, Color.fromRGB(11546150));
             } else if (scoreManager.getPlayerTeam(player).equals(scoreManager.getTeamB())) {
               equipArmor(player, Color.fromRGB(3949738));
@@ -433,6 +440,12 @@ public class Lobby {
   public void broadcastMessage(String message) {
     for(Player player: playersInLobby) {
       player.sendMessage(message);
+    }
+  }
+
+  public void broadcastTitle(String title, String subTitle, int fadeIn, int stay, int fadeOut) {
+    for (Player player: playersInLobby) {
+      player.sendTitle(title, subTitle, fadeIn, stay, fadeOut);
     }
   }
 
@@ -506,9 +519,6 @@ public class Lobby {
   private void removePlayerCleanup(Player player) {
     if (scoreManager != null) {
       player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-      if (scoreManager.getTeamA().hasEntry(player.getName()) || scoreManager.getTeamB().hasEntry(player.getName())) {
-        player.setDisplayName(player.getName());
-      }
     }
   }
 
