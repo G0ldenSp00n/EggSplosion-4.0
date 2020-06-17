@@ -24,7 +24,6 @@ import com.g0ldensp00n.eggsplosion.handlers.Lobby.Lobby;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.ScoreManager;
 import com.g0ldensp00n.eggsplosion.handlers.Lobby.ScoreType;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.Team;
 
 public class RespawnHandler implements Listener {
   private LobbyManager lobbyManager;
@@ -58,15 +57,15 @@ public class RespawnHandler implements Listener {
           player.setHealth(20);
           Lobby playersLobby = lobbyManager.getPlayersLobby(player);
           Location spawnPoint = null;
-          if (playersLobby.getScoreboardManager() != null && playersLobby.getScoreboardManager().getScoreType() == ScoreType.TEAM) {
+          if (playersLobby != null && playersLobby.getScoreboardManager() != null && playersLobby.getScoreboardManager().getScoreType() == ScoreType.TEAM) {
             if (playersLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
               if (player.getInventory().getHelmet() != null) {
                 if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
                   playersLobby.broadcastMessage(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
-                  playersLobby.getMap().respawnFlag(Team.TEAM_B);
+                  playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamB());
                 } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
                   playersLobby.broadcastMessage(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
-                  playersLobby.getMap().respawnFlag(Team.TEAM_A);
+                  playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamA());
                 }
                 playersLobby.equipPlayer(player);
               }
@@ -74,13 +73,13 @@ public class RespawnHandler implements Listener {
             
             ScoreManager scoreboardManager = playersLobby.getScoreboardManager();
             if (scoreboardManager.getPlayerTeam(player).equals(scoreboardManager.getTeamA())) {
-              spawnPoint = playersLobby.getMap().getSpawnPoint(Team.TEAM_A);
+              spawnPoint = playersLobby.getMap().getSpawnPoint(scoreboardManager.getTeamA());
             } else if (scoreboardManager.getPlayerTeam(player).equals(scoreboardManager.getTeamB())) {
-              spawnPoint = playersLobby.getMap().getSpawnPoint(Team.TEAM_B);
+              spawnPoint = playersLobby.getMap().getSpawnPoint(scoreboardManager.getTeamB());
             }
           } else {
-            if (playersLobby.getMap() != null) {
-              spawnPoint = playersLobby.getMap().getSpawnPoint(Team.SOLO);
+            if (playersLobby != null && playersLobby.getMap() != null) {
+              spawnPoint = playersLobby.getMap().getSpawnPoint();
             }
           }
 

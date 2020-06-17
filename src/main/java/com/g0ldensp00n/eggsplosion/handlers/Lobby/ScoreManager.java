@@ -1,5 +1,8 @@
 package com.g0ldensp00n.eggsplosion.handlers.Lobby;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -70,6 +73,14 @@ public class ScoreManager {
     return teamB;
   }
 
+  public List<Team> getTeams() {
+    List<Team> teams = new ArrayList<>();
+    teams.add(teamA);
+    teams.add(teamB);
+
+    return teams;
+  }
+
   public Scoreboard getScoreboard() {
     return scoreboard;
   }
@@ -117,6 +128,7 @@ public class ScoreManager {
   }
 
   public void addScorePlayer(Player player) {
+    Boolean shouldRotate = false;
     if (lobby.playerInLobby(player) && !scoreFrozen) {
       Integer newScore = 0;
       switch(scoreType) {
@@ -129,8 +141,14 @@ public class ScoreManager {
           Team playerTeam = scoreboard.getEntryTeam(player.getName());
           Score teamScore = scoreObjective.getScore(playerTeam.getDisplayName());
 
+          if (teamScore.getScore() + 1 == (scoreToWin/2) && scoreObjective.getScore(getTeamA().getDisplayName()).getScore() < (scoreToWin/2) && scoreObjective.getScore(getTeamB().getDisplayName()).getScore() < (scoreToWin/2)) {
+            shouldRotate = true;
+          }
+
           newScore = teamScore.getScore() + 1;
           teamScore.setScore(newScore);
+
+
           break;
         case INFO:
           break;
@@ -140,6 +158,8 @@ public class ScoreManager {
 
       if (scoreToWin != -1 && (newScore >= scoreToWin)) {
         lobby.playerWon(player);
+      } else if (scoreToWin != -1 && shouldRotate) {
+        lobby.rotateSides();
       }
     }
   }

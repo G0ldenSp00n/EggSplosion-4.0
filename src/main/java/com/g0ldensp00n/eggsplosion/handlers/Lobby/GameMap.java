@@ -2,36 +2,42 @@ package com.g0ldensp00n.eggsplosion.handlers.Lobby;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.Team;
 
 public class GameMap {
   private Location cornerA;
   private Location cornerB;
   private List<Location> soloSpawnLocations;
-  private List<Location> teamASpawnLocations;
-  private List<Location> teamBSpawnLocations;
+  private Map<Integer, List<Location>> sideSpawnLocations;
   private List<GameMode> supportedGameModes;
-  private Location teamAFlagLocation;
-  private Location teamBFlagLocation;
+  private Map<Integer, Location> sideFlagLocation;
+  private Map<Team, Integer> teamSide;
   private ItemStack helmet;
   private ItemStack chestplate;
   private ItemStack leggings;
   private ItemStack boots;
+  private Boolean doSideSwitch = false;
 
   public GameMap(Location cornerA, Location cornerB) {
     this.cornerA = cornerA;
     this.cornerB = cornerB;
 
+    teamSide = new Hashtable<Team, Integer>();
+
     soloSpawnLocations = new ArrayList<Location>();
-    teamASpawnLocations = new ArrayList<Location>();
-    teamBSpawnLocations = new ArrayList<Location>();
+    sideSpawnLocations = new Hashtable<Integer, List<Location>>();
+    sideFlagLocation = new Hashtable<Integer, Location>();
 
     supportedGameModes = new ArrayList<GameMode>();
   }
@@ -42,6 +48,14 @@ public class GameMap {
 
   public Location getCornerB() {
     return cornerB;
+  }
+
+  public Boolean getDoSideSwitch() {
+    return doSideSwitch;
+  }
+
+  public void setDoSideSwitch(Boolean doSideSwitch) {
+    this.doSideSwitch = doSideSwitch;
   }
 
   public ItemStack getHelmet() {
@@ -104,26 +118,76 @@ public class GameMap {
     return soloSpawnLocations;
   }
 
-  public List<Location> getTeamASpawnLocations() {
-    return teamASpawnLocations;
+  public List<Location> getSideSpawnLocations(Integer side) {
+    return sideSpawnLocations.get(side);
   }
 
-  public List<Location> getTeamBSpawnLocations() {
-    return teamBSpawnLocations;
+  public List<Location> getSideASpawnLocations() {
+    return getSideSpawnLocations(0);
   }
 
-  public void spawnFlag(Team team) {
-    Location flagLocation;
-    Material flagType;
-    if (team == Team.TEAM_A) {
-      flagLocation = teamAFlagLocation.clone();
-      flagType = Material.RED_BANNER;
-    } else if (team == Team.TEAM_B) {
-      flagLocation = teamBFlagLocation.clone();
-      flagType = Material.BLUE_BANNER;
-    } else {
-      return;
+  public List<Location> getSideBSpawnLocations() {
+    return getSideSpawnLocations(1);
+  }
+
+  public Team getSideTeam(Integer side) {
+    for(Entry<Team, Integer> entry : teamSide.entrySet()) {
+      if (entry.getValue() == side) {
+        return entry.getKey();
+      }
     }
+    return null;
+  }
+
+  public void randomizeTeamSides(List<Team> teams) {
+    if (doSideSwitch) {
+      Random random = new Random();
+      List<Team> teamsToAdd = new ArrayList<>(teams);
+      Integer side = 0;
+      while(teamsToAdd.size() > 0) {
+        Integer nextTeam = random.nextInt(teamsToAdd.size());
+        Team team = teamsToAdd.get(nextTeam);
+        teamSide.put(team, side);
+
+        side++;
+        teamsToAdd.remove(team);
+      }
+    } else {
+      Integer side = 0;
+      for (Team team: teams) {
+        teamSide.put(team, side++);
+      }
+    }
+  }
+
+  public void switchTeamSides() {
+    if (doSideSwitch) {
+      Team sideOneTeam = getSideTeam(0); 
+      for (Integer side = 0; side < teamSide.size(); side++) {
+        Team team = getSideTeam(side);
+        teamSide.put(team, side - 1);
+      }
+
+      teamSide.put(sideOneTeam, teamSide.size()-1);
+    }
+  }
+
+  public Integer getTeamSide(Team team) {
+    return teamSide.get(team);
+  }
+
+  public Location getSideFlagLocation(Integer side) {
+    if (sideFlagLocation.get(side) != null) {
+      return sideFlagLocation.get(side).clone();
+    }
+    return null;
+  }
+
+  public void spawnFlag(Integer side) {
+    Team team = getSideTeam(side);
+    String bannerType  = team.getColor().name() + "_BANNER";
+    Location flagLocation = getSideFlagLocation(side).clone();
+    Material flagType = Material.getMaterial(bannerType);
 
     flagLocation.add(0, 1, 0);
     Block teamFlag = flagLocation.getBlock();
@@ -131,47 +195,48 @@ public class GameMap {
     teamFlagBase.add(0, -1, 0);
     Block teamFlagBaseBlock = teamFlagBase.getBlock();
 
+    teamFlag.setType(Material.AIR);
     teamFlagBaseBlock.setType(Material.OBSIDIAN);
     teamFlag.setType(flagType);
   }
 
   public void spawnFlags() {
-    if (teamAFlagLocation != null) {
-      spawnFlag(Team.TEAM_A);
-    }
-
-    if (teamBFlagLocation != null) {
-      spawnFlag(Team.TEAM_B);
+    for (int side = 0; side < sideFlagLocation.size(); side++) {
+      spawnFlag(side);
     }
   }
 
   public void respawnFlag(Team team) {
-    spawnFlag(team);
+    spawnFlag(getTeamSide(team));
   }
 
-  public void setTeamAFlagLocation(Location location) {
-    teamAFlagLocation = location;
+  public void setSideFlagLocation(Integer side, Location location) {
+    sideFlagLocation.put(side, location);
   }
 
-  public void setTeamBFlagLocation(Location location) {
-    teamBFlagLocation = location;
+  public void setSideAFlagLocation(Location location) {
+    setSideFlagLocation(0, location);
   }
 
-  public Location getTeamAFlagLocation() {
-    return teamAFlagLocation;
+  public void setSideBFlagLocation(Location location) {
+    setSideFlagLocation(1, location);
   }
 
-  public Location getTeamBFlagLocation() {
-    return teamBFlagLocation;
+  public Location getSideAFlagLocation() {
+    return getSideFlagLocation(0);
   }
 
-  public void loadMapFromFile(List<Location> soloSpawnLocations, List<Location> teamASpawnLocations, List<Location> teamBSpawnLocations, Location teamAFlagLocation, Location teamBFlagLocation) {
+  public Location getSideBFlagLocation() {
+    return getSideFlagLocation(1);
+  }
+
+  public void loadMapFromFile(List<Location> soloSpawnLocations, List<Location> sideASpawnLocations, List<Location> sideBSpawnLocations, Location sideAFlagLocation, Location sideBFlagLocation) {
     this.soloSpawnLocations = soloSpawnLocations;
-    this.teamASpawnLocations = teamASpawnLocations;
-    this.teamBSpawnLocations = teamBSpawnLocations;
+    this.sideSpawnLocations.put(0, sideASpawnLocations);
+    this.sideSpawnLocations.put(1, sideBSpawnLocations);
 
-    this.teamAFlagLocation = teamAFlagLocation;
-    this.teamBFlagLocation = teamBFlagLocation;
+    this.sideFlagLocation.put(0, sideAFlagLocation);
+    this.sideFlagLocation.put(1, sideBFlagLocation);
   }
 
   public void addSupportedGameMode(GameMode gameMode) {
@@ -209,29 +274,32 @@ public class GameMap {
     soloSpawnLocations.add(location);
   }
 
-  public void addTeamASpawnPoint(Location location) {
-    teamASpawnLocations.add(location);
+  public void addSideSpawnPoint(Integer side, Location location) {
+    sideSpawnLocations.get(side).add(location);
   }
 
-  public void addTeamBSpawnPoint(Location location) {
-    teamBSpawnLocations.add(location);
+  public void addSideASpawnPoint(Location location) {
+    addSideSpawnPoint(0, location);
+  }
+
+  public void addSideBSpawnPoint(Location location) {
+    addSideSpawnPoint(1, location);
   }
 
   public Location getSpawnPoint(Team team) {
     Random random = new Random();
     Location spawnPoint = null;
-    if (team == Team.SOLO) {
-      Integer spawnInt = random.nextInt(soloSpawnLocations.size());
-      spawnPoint = soloSpawnLocations.get(spawnInt);
-    } else if (team == Team.TEAM_A) {
-      if (teamASpawnLocations.size() > 0) {
-        Integer spawnInt = random.nextInt(teamASpawnLocations.size());
-        spawnPoint = teamASpawnLocations.get(spawnInt);
+    if (team == null) {
+      if (soloSpawnLocations.size() > 0) {
+        Integer spawnInt = random.nextInt(soloSpawnLocations.size());
+        spawnPoint = soloSpawnLocations.get(spawnInt);
       }
-    } else if (team == Team.TEAM_B) {
-      if (teamBSpawnLocations.size() > 0) {
-        Integer spawnInt = random.nextInt(teamBSpawnLocations.size());
-        spawnPoint = teamBSpawnLocations.get(spawnInt);
+    } else {
+      Integer playerTeamSide = getTeamSide(team);
+      List<Location> spawnLocations = getSideSpawnLocations(playerTeamSide);
+      if (spawnLocations != null && (spawnLocations.size() > 0)) {
+        Integer spawnInt = random.nextInt(spawnLocations.size());
+        spawnPoint = spawnLocations.get(spawnInt);
       }
     }
 
@@ -241,5 +309,9 @@ public class GameMap {
       return adjustedSpawnPoint;
     }
     return null;
+  }
+
+  public Location getSpawnPoint() {
+    return getSpawnPoint(null);
   }
 }

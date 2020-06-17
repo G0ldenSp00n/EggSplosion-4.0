@@ -64,21 +64,21 @@ public class GameModeListeners implements Listener {
     if (playerLobby != null && playerLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
       if (player.getInventory().getHelmet() != null) {
         if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
-          Location playerFlagLocation = playerLobby.getMap().getTeamBFlagLocation().clone();
+          Location playerFlagLocation = playerLobby.getMap().getSideFlagLocation(playerLobby.getMap().getTeamSide(playerLobby.getScoreboardManager().getTeamB()));
           playerFlagLocation.add(0, 1, 0);
           if (player.getLocation().distance(playerFlagLocation) < 5 && playerFlagLocation.getBlock().getType().equals(Material.BLUE_BANNER)) {
             playerLobby.equipPlayer(player);
             playerLobby.broadcastMessage(playerLobby.getScoreboardManager().getPlayerDisplayName(player) + " has captured the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
-            playerLobby.getMap().respawnFlag(Team.TEAM_A);
+            playerLobby.getMap().respawnFlag(playerLobby.getScoreboardManager().getTeamA());
             playerLobby.getScoreboardManager().addScorePlayer(player);
           }
         } else if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
-          Location playerFlagLocation = playerLobby.getMap().getTeamAFlagLocation().clone();
+          Location playerFlagLocation = playerLobby.getMap().getSideFlagLocation(playerLobby.getMap().getTeamSide(playerLobby.getScoreboardManager().getTeamA()));
           playerFlagLocation.add(0, 1, 0);
           if (player.getLocation().distance(playerFlagLocation) < 5 && playerFlagLocation.getBlock().getType().equals(Material.RED_BANNER)) {
             playerLobby.equipPlayer(player);
             playerLobby.broadcastMessage(playerLobby.getScoreboardManager().getPlayerDisplayName(player) + " has captured the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
-            playerLobby.getMap().respawnFlag(Team.TEAM_B);
+            playerLobby.getMap().respawnFlag(playerLobby.getScoreboardManager().getTeamB());
             playerLobby.getScoreboardManager().addScorePlayer(player);
           }
         }

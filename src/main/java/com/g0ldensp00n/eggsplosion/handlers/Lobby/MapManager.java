@@ -88,13 +88,15 @@ public class MapManager implements Listener, CommandExecutor {
         FileConfiguration mapConfigFile = YamlConfiguration.loadConfiguration(file);
         GameMap map = new GameMap(mapConfigFile.getLocation("cornerA"), mapConfigFile.getLocation("cornerB"));
         List<?> soloSpawnItems = mapConfigFile.getList("soloSpawnLocations");
-        List<?> teamASpawnItems = mapConfigFile.getList("teamASpawnLocations");
-        List<?> teamBSpawnItems = mapConfigFile.getList("teamBSpawnLocations");
+        List<?> sideASpawnItems = mapConfigFile.getList("teamASpawnLocations");
+        List<?> sideBSpawnItems = mapConfigFile.getList("teamBSpawnLocations");
 
         List<Location> soloSpawnLocations = convertToLocationList(soloSpawnItems);
-        List<Location> teamASpawnLocations = convertToLocationList(teamASpawnItems);
-        List<Location> teamBSpawnLocations = convertToLocationList(teamBSpawnItems);
-        map.loadMapFromFile(soloSpawnLocations, teamASpawnLocations, teamBSpawnLocations, mapConfigFile.getLocation("teamAFlagLocation"), mapConfigFile.getLocation("teamBFlagLocation"));
+        List<Location> sideASpawnLocations = convertToLocationList(sideASpawnItems);
+        List<Location> sideBSpawnLocations = convertToLocationList(sideBSpawnItems);
+        map.loadMapFromFile(soloSpawnLocations, sideASpawnLocations, sideBSpawnLocations, mapConfigFile.getLocation("teamAFlagLocation"), mapConfigFile.getLocation("teamBFlagLocation"));
+
+        map.setDoSideSwitch(mapConfigFile.getBoolean("doSideSwitch"));
 
         ItemStack helmet = mapConfigFile.getItemStack("helmet");
         ItemStack chestplate = mapConfigFile.getItemStack("chestplate");
@@ -149,25 +151,27 @@ public class MapManager implements Listener, CommandExecutor {
         if (map.getCornerB() != null) {
           mapConfigFile.set("cornerB", map.getCornerB());
         }
+        
+        mapConfigFile.set("doSideSwitch", map.getDoSideSwitch());
 
-        if (map.getTeamAFlagLocation() != null) {
-          mapConfigFile.set("teamAFlagLocation", map.getTeamAFlagLocation());
+        if (map.getSideAFlagLocation() != null) {
+          mapConfigFile.set("teamAFlagLocation", map.getSideAFlagLocation());
         }
 
-        if (map.getTeamBFlagLocation() != null) {
-          mapConfigFile.set("teamBFlagLocation", map.getTeamBFlagLocation());
+        if (map.getSideBFlagLocation() != null) {
+          mapConfigFile.set("teamBFlagLocation", map.getSideBFlagLocation());
         }
 
         if (map.getSoloSpawnLocations() != null) {
           mapConfigFile.set("soloSpawnLocations", map.getSoloSpawnLocations());
         }
 
-        if (map.getTeamAFlagLocation() != null) {
-          mapConfigFile.set("teamASpawnLocations", map.getTeamASpawnLocations());
+        if (map.getSideAFlagLocation() != null) {
+          mapConfigFile.set("teamASpawnLocations", map.getSideASpawnLocations());
         }
 
-        if (map.getTeamBFlagLocation() != null) {
-          mapConfigFile.set("teamBSpawnLocations", map.getTeamBSpawnLocations());
+        if (map.getSideBFlagLocation() != null) {
+          mapConfigFile.set("teamBSpawnLocations", map.getSideBSpawnLocations());
         }
 
         if (map.getHelmet() != null) {
@@ -265,7 +269,7 @@ public class MapManager implements Listener, CommandExecutor {
           }
         } else if (mappingTool.getType().equals(Material.IRON_AXE)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          if (itemLore.get(0).split(":").length >= 1) {
+          if (itemLore.get(0) != null && (itemLore.get(0).split(":").length >= 1)) {
             String mapName = itemLore.get(0).split(":")[1].trim();
             GameMap map = gameMaps.get(mapName);
             if (map != null) {
@@ -281,14 +285,14 @@ public class MapManager implements Listener, CommandExecutor {
           }
         } else if (mappingTool.getType().equals(Material.GOLDEN_AXE)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          if (itemLore.get(0).split(":").length >= 1) {
+          if (itemLore.get(0) != null && (itemLore.get(0).split(":").length >= 1)) {
             String mapName = itemLore.get(0).split(":")[1].trim();
             GameMap map = gameMaps.get(mapName);
             if (map != null) {
               Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
               spawnPoint.setYaw(player.getLocation().getYaw());
               if (map.locationInMap(spawnPoint)) {
-                map.addTeamASpawnPoint(spawnPoint);
+                map.addSideASpawnPoint(spawnPoint);
                 player.sendMessage("Added" + ChatColor.RED + " Team A " + ChatColor.RESET + "Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
               } else {
                 player.sendMessage("Spawn Point must be in Map Boundary");
@@ -297,14 +301,14 @@ public class MapManager implements Listener, CommandExecutor {
           }
         } else if (mappingTool.getType().equals(Material.DIAMOND_AXE)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          if (itemLore.get(0).split(":").length >= 1) {
+          if (itemLore.get(0) != null && (itemLore.get(0).split(":").length >= 1)) {
             String mapName = itemLore.get(0).split(":")[1].trim();
             GameMap map = gameMaps.get(mapName);
             if (map != null) {
               Location spawnPoint = playerInteractEvent.getClickedBlock().getLocation();
               spawnPoint.setYaw(player.getLocation().getYaw());
               if (map.locationInMap(spawnPoint)) {
-                map.addTeamBSpawnPoint(spawnPoint);
+                map.addSideBSpawnPoint(spawnPoint);
                 player.sendMessage("Added" + ChatColor.BLUE + " Team B " + ChatColor.RESET + "Spawn Point (" + spawnPoint.getBlockX() + ", " + spawnPoint.getBlockY() + ", " + spawnPoint.getBlockZ() + ")");
               } else {
                 player.sendMessage("Spawn Point must be in Map Boundary");
@@ -313,13 +317,13 @@ public class MapManager implements Listener, CommandExecutor {
           }
         } else if (mappingTool.getType().equals(Material.GOLDEN_SHOVEL)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          if (itemLore.get(0).split(":").length >= 1) {
+          if (itemLore.get(0) != null && (itemLore.get(0).split(":").length >= 1)) {
             String mapName = itemLore.get(0).split(":")[1].trim();
             GameMap map = gameMaps.get(mapName);
             if (map != null) {
               Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
               if (map.locationInMap(flagLocation)) {
-                map.setTeamAFlagLocation(flagLocation);
+                map.setSideAFlagLocation(flagLocation);
                 player.sendMessage("Set" + ChatColor.RED + " Team A " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
               } else {
                 player.sendMessage("Flag Location must be in Map Boundary");
@@ -328,13 +332,13 @@ public class MapManager implements Listener, CommandExecutor {
           }
         } else if (mappingTool.getType().equals(Material.DIAMOND_SHOVEL)) {
           List<String> itemLore = mappingTool.getItemMeta().getLore();
-          if (itemLore.get(0).split(":").length >= 1) {
+          if (itemLore.get(0) != null && (itemLore.get(0).split(":").length >= 1)) {
             String mapName = itemLore.get(0).split(":")[1].trim();
             GameMap map = gameMaps.get(mapName);
             if (map != null) {
               Location flagLocation = playerInteractEvent.getClickedBlock().getLocation();
               if (map.locationInMap(flagLocation)) {
-                map.setTeamBFlagLocation(flagLocation);
+                map.setSideBFlagLocation(flagLocation);
                 player.sendMessage("Set" + ChatColor.BLUE + " Team B " + ChatColor.RESET + "Flag Location (" + flagLocation.getBlockX() + ", " + flagLocation.getBlockY() + ", " + flagLocation.getBlockZ() + ")");
               } else {
                 player.sendMessage("Flag Location must be in Map Boundary");
@@ -463,6 +467,29 @@ public class MapManager implements Listener, CommandExecutor {
                 player.openInventory(mapEquipmentMenu);
               } else {
                 sender.sendMessage("[EggSplosion] Map doesn't exists, create it to set its equipment");
+              }
+            }
+            break;
+          case "gamerule":
+            if (args.length > 2) {
+              GameMap map = gameMaps.get(args[1]);
+              if (map != null) {
+                if (args.length == 3) {
+                  if (args[2].equals("doSideSwitch")) {
+                    sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule doSideSwitch is currently set to: " + map.getDoSideSwitch());
+                    return true;
+                  }
+                } else if (args.length == 4) {
+                  if (args[3].equalsIgnoreCase("true")) {
+                    map.setDoSideSwitch(true);
+                    sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule doSideSwitch is now set to: true");
+                    return true;
+                  } else if (args[3].equalsIgnoreCase("false")) {
+                    map.setDoSideSwitch(false);
+                    sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule doSideSwitch is now set to: false");
+                    return true;
+                  }
+                }
               }
             }
         }

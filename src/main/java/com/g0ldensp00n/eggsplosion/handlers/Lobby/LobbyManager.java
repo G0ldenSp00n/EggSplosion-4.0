@@ -162,7 +162,10 @@ public class LobbyManager implements Listener, CommandExecutor {
               if (sender instanceof Player) {
                 Player playerCmdSender = (Player) sender;
                 Lobby playerLobby = getPlayersLobby(playerCmdSender);
-                if (playerLobby != getMainLobby()) {
+                if (playerLobby == null) {
+                  joinLobby(getMainLobby(), playerCmdSender);
+                }
+                if (playerLobby != null && playerLobby != getMainLobby()) {
                   joinLobby(getMainLobby(), playerCmdSender);
 
                   playerCmdSender.sendMessage("[EggSplosion] Left Lobby " + ChatColor.AQUA + playerLobby.getLobbyName());

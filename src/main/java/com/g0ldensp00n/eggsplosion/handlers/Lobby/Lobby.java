@@ -19,7 +19,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 public class Lobby {
@@ -49,7 +48,7 @@ public class Lobby {
     readyPlayers = new Hashtable<Player, Boolean>();
 
     if (gameMode == GameMode.WAITING) {
-      setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.WHITE, ChatColor.GREEN, false));
+      setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.GRAY, ChatColor.GREEN, false));
     }
   }
 
@@ -136,8 +135,10 @@ public class Lobby {
         unreadyPlayer(player);
         equipPlayer(player);
         if (lobbyName != "MAIN_LOBBY") {
-          Location spawnPoint = this.currentMap.getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.SOLO);
-          player.teleport(spawnPoint);
+          Location spawnPoint = this.currentMap.getSpawnPoint();
+          if (spawnPoint != null) {
+            player.teleport(spawnPoint);
+          }
           player.setGameMode(org.bukkit.GameMode.ADVENTURE);
           player.setFoodLevel(20);
           player.setHealth(20);
@@ -277,7 +278,7 @@ public class Lobby {
     for (Player player: getPlayers()) {
       unreadyPlayer(player);
     }
-    setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.WHITE, ChatColor.GREEN, false));
+    setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.GRAY, ChatColor.GREEN, false));
   }
 
   public void startGame() {
@@ -296,7 +297,7 @@ public class Lobby {
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         break;
       case CAPTURE_THE_FLAG:
-        setScoreManager(new ScoreManager(3, ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
+        setScoreManager(new ScoreManager(4, ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
         randomizeTeams();
         setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
         this.currentMap.spawnFlags();
@@ -305,6 +306,18 @@ public class Lobby {
         break;
     }
     setGameMode(gameMode);
+  }
+
+  public void rotateSides() {
+    if (getMap().getDoSideSwitch()) {
+      getMap().switchTeamSides();
+      getMap().spawnFlags();
+      for(Player player: getPlayers()) {
+        equipPlayer(player);
+      }
+      broadcastTitle("Switching Sides", "", 0, 40, 0);
+      spawnPlayersInMap(scoreManager.getScoreType());
+    }
   }
 
   public void ifAllPlayersReadyStartGame() {
@@ -360,6 +373,13 @@ public class Lobby {
     return readyPlayers.get(player);
   }
 
+  public ItemStack setUnbreakable(ItemStack itemStack) {
+    ItemMeta itemMeta = itemStack.getItemMeta();
+    itemMeta.setUnbreakable(true);
+    itemStack.setItemMeta(itemMeta);
+    return itemStack;
+  }
+
   public void equipWeapons(Player player) {
     ItemStack woodenHoe = new ItemStack(Material.WOODEN_HOE);
     ItemStack stoneHoe = new ItemStack(Material.STONE_HOE);
@@ -367,11 +387,11 @@ public class Lobby {
     ItemStack goldenHoe = new ItemStack(Material.GOLDEN_HOE);
     ItemStack diamondHoe = new ItemStack(Material.DIAMOND_HOE);
 
-    player.getInventory().setItem(0, woodenHoe);
-    player.getInventory().setItem(1, stoneHoe);
-    player.getInventory().setItem(2, ironHoe);
-    player.getInventory().setItem(3, goldenHoe);
-    player.getInventory().setItem(4, diamondHoe);
+    player.getInventory().setItem(0, setUnbreakable(woodenHoe));
+    player.getInventory().setItem(1, setUnbreakable(stoneHoe));
+    player.getInventory().setItem(2, setUnbreakable(ironHoe));
+    player.getInventory().setItem(3, setUnbreakable(goldenHoe));
+    player.getInventory().setItem(4, setUnbreakable(diamondHoe));
   }
 
   public void equipArmor(Player player, Color color) {
@@ -439,10 +459,10 @@ public class Lobby {
       boots.setItemMeta(leatherBootsMeta);
     }
 
-    player.getInventory().setHelmet(helmet);
-    player.getInventory().setChestplate(chestplate);
-    player.getInventory().setLeggings(leggings);
-    player.getInventory().setBoots(boots);
+    player.getInventory().setHelmet(setUnbreakable(helmet));
+    player.getInventory().setChestplate(setUnbreakable(chestplate));
+    player.getInventory().setLeggings(setUnbreakable(leggings));
+    player.getInventory().setBoots(setUnbreakable(boots));
   }
 
   public void equipPlayer(Player player) {
@@ -531,18 +551,17 @@ public class Lobby {
     }
   }
 
-  public void setMap(GameMap map, ScoreType scoreType) {
-    this.currentMap = map;
+  public void spawnPlayersInMap(ScoreType scoreType) {
     for (Player player: getPlayers()) {
       if (scoreType == ScoreType.SOLO || scoreType == ScoreType.INFO) {
-        Location spawnPoint = this.currentMap.getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.SOLO);
+        Location spawnPoint = this.currentMap.getSpawnPoint();
         player.teleport(spawnPoint);
       } else if (scoreType == ScoreType.TEAM) {
         Location spawnPoint = null;
         if (scoreManager.getTeamA().hasEntry(player.getName())) {
-          spawnPoint = this.getMap().getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.TEAM_A);
+          spawnPoint = this.getMap().getSpawnPoint(scoreManager.getTeamA());
         } else if (scoreManager.getTeamB().hasEntry(player.getName())) {
-          spawnPoint = this.getMap().getSpawnPoint(com.g0ldensp00n.eggsplosion.handlers.Lobby.Team.TEAM_B);
+          spawnPoint = this.getMap().getSpawnPoint(scoreManager.getTeamB());
         }
 
         if (spawnPoint != null) {
@@ -550,6 +569,14 @@ public class Lobby {
         }
       }
     }
+  }
+
+  public void setMap(GameMap map, ScoreType scoreType) {
+    this.currentMap = map;
+    if (scoreType == ScoreType.TEAM) {
+      map.randomizeTeamSides(scoreManager.getTeams());
+    }
+    spawnPlayersInMap(scoreType);
   }
 
   public boolean addPlayers(Collection<? extends Player> players) {
