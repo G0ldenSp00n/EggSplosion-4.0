@@ -37,7 +37,9 @@ public class EggSplosion extends JavaPlugin {
         Food food = new Food(this);
 
         this.getCommand("lobby").setExecutor(lobbyManager);
+        this.getCommand("lobby").setTabCompleter(lobbyManager);
         this.getCommand("map").setExecutor(mapManager);
+        this.getCommand("map").setTabCompleter(mapManager);
     }
 
     @Override

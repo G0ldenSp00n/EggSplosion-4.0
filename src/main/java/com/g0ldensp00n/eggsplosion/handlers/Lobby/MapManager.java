@@ -17,6 +17,7 @@ import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.HumanEntity;
@@ -36,7 +37,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
-public class MapManager implements Listener, CommandExecutor {
+public class MapManager implements Listener, CommandExecutor, TabCompleter {
   private ItemStack Map_Tool_boundary;
   private Map<Player, List<Location>> boundaryToolTracker;
   private Map<String, GameMap> gameMaps;
@@ -496,5 +497,53 @@ public class MapManager implements Listener, CommandExecutor {
       }
     }
     return false;
+  }
+
+  @Override
+  public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+    if (cmd.getName().equalsIgnoreCase("map")) {
+      switch (args.length) {
+        case 1:
+          List<String> commands = new ArrayList<>();
+          commands.add("create");
+          commands.add("tools");
+          commands.add("equip");
+          commands.add("gamerule");
+          return commands;         
+        case 2:
+          switch(args[0]) {
+            case "equip":
+            case "gamerule":
+            case "tools":
+              List<String> mapNames = new ArrayList<>();
+              Iterator<String> mapNamesIterator = gameMaps.keySet().iterator();
+              while (mapNamesIterator.hasNext()) {
+                mapNames.add(mapNamesIterator.next());
+              }
+              return mapNames;
+            case "create":
+            default:
+              return new ArrayList<>();
+          }
+        case 3:
+          switch(args[0]) {
+            case "gamerule":
+              List<String> gameRules = new ArrayList<>();
+              gameRules.add("doSideSwitch");
+              return gameRules;
+            default:
+              return new ArrayList<>();
+          }
+        case 4:
+          switch(args[0]) {
+            case "gamerule":
+            List<String> trueFalse = new ArrayList<>();
+            trueFalse.add("true");
+            trueFalse.add("false");
+            return trueFalse;
+          }
+      }
+    }
+    return null;
   }
 }

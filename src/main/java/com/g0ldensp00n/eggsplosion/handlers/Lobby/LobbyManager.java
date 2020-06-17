@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
 import java.util.*;
 import org.bukkit.entity.Player;
@@ -14,7 +15,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
-public class LobbyManager implements Listener, CommandExecutor {
+public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
   private Plugin plugin;
   private Hashtable<String, Lobby> lobbies;
   private Lobby mainLobby;
@@ -199,5 +200,36 @@ public class LobbyManager implements Listener, CommandExecutor {
         }
       }
       return false;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
+      if (cmd.getName().equalsIgnoreCase("lobby")) {
+        switch (args.length) {
+          case 1:
+            List<String> commands = new ArrayList<>();
+            commands.add("create");
+            commands.add("join");
+            commands.add("leave");
+            commands.add("list");
+            return commands;         
+          case 2:
+            switch(args[0]) {
+              case "join":
+                List<String> lobbyNames = new ArrayList<>();
+                Iterator<String> lobbyNamesIterator = lobbies.keys().asIterator();
+                while (lobbyNamesIterator.hasNext()) {
+                  lobbyNames.add(lobbyNamesIterator.next());
+                }
+                return lobbyNames;
+              case "create":
+              case "list":
+              case "leave":
+              default:
+                return new ArrayList<>();
+            }
+        }
+      }
+      return null;
     }
 }

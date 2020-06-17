@@ -147,7 +147,11 @@ public class ExplosionRegen implements Listener {
               } else if (block.getType().equals(Material.TNT)) {
                   blockInfo.add(new ExplosionRegen(block));
                   block.setType(Material.AIR, false);
-                  block.getLocation().getWorld().createExplosion(block.getLocation(), 2.8f, false, true, event.getEntity());
+                  if (event.getEntity() != null) {
+                    block.getLocation().getWorld().createExplosion(block.getLocation(), 2.8f, false, true, event.getEntity());
+                  } else { 
+                    block.getLocation().getWorld().createExplosion(block.getLocation(), 2.8f);
+                  }
                   block.getLocation().getWorld().spawnParticle(Particle.EXPLOSION_HUGE, block.getLocation(), 0);
               }
         // Handle Non-Solid Blocks
