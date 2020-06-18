@@ -8,11 +8,16 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Team;
 
 public class GameMap {
@@ -23,6 +28,8 @@ public class GameMap {
   private List<GameMode> supportedGameModes;
   private Map<Integer, Location> sideFlagLocation;
   private Map<Team, Integer> teamSide;
+  private List<PotionEffect> mapEffects;
+  private Inventory playerLoadout;
   private ItemStack helmet;
   private ItemStack chestplate;
   private ItemStack leggings;
@@ -34,12 +41,14 @@ public class GameMap {
     this.cornerB = cornerB;
 
     teamSide = new Hashtable<Team, Integer>();
+    playerLoadout = Bukkit.createInventory(null, InventoryType.PLAYER, "Map Loadout");
 
     soloSpawnLocations = new ArrayList<Location>();
     sideSpawnLocations = new Hashtable<Integer, List<Location>>();
     sideFlagLocation = new Hashtable<Integer, Location>();
 
     supportedGameModes = new ArrayList<GameMode>();
+    mapEffects = new ArrayList<PotionEffect>();
   }
 
   public Location getCornerA() {
@@ -48,6 +57,33 @@ public class GameMap {
 
   public Location getCornerB() {
     return cornerB;
+  }
+
+  public List<PotionEffect> getMapEffects() {
+    return mapEffects;
+  }
+
+  public void addMapEffect(PotionEffect effect) {
+    mapEffects.add(effect);
+  }
+
+  public Inventory getLoadout() {
+    return playerLoadout;
+  }
+
+  public void setLoadoutContents (ItemStack[] playerLoadoutContents) {
+    this.playerLoadout.setContents(playerLoadoutContents);
+  }
+
+  public void addMapEffect(PotionEffectType potionType, int amplifier) {
+    if (potionType != null) {
+      PotionEffect effect = new PotionEffect(potionType, 20 * 9, amplifier - 1, true);
+      mapEffects.add(effect);
+    }
+  }
+
+  public void removeMapEffect(PotionEffect effect) {
+    mapEffects.remove(effect);
   }
 
   public Boolean getDoSideSwitch() {

@@ -36,6 +36,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class MapManager implements Listener, CommandExecutor, TabCompleter {
   private ItemStack Map_Tool_boundary;
@@ -66,11 +68,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
     if (list != null) { 
       Iterator<?> listIterator = list.iterator();
       while(listIterator.hasNext()) {
-        try {
-          Location loc = (Location) listIterator.next();
+        Object nextObject = listIterator.next();
+        if (nextObject instanceof Location) {
+          Location loc = (Location) nextObject;
           locationList.add(loc);
-        } catch (ClassFormatError e) {
-          // Suppress
         }
       }
     }
@@ -98,6 +99,31 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
         map.loadMapFromFile(soloSpawnLocations, sideASpawnLocations, sideBSpawnLocations, mapConfigFile.getLocation("teamAFlagLocation"), mapConfigFile.getLocation("teamBFlagLocation"));
 
         map.setDoSideSwitch(mapConfigFile.getBoolean("doSideSwitch"));
+
+        List<?> mapEffects = mapConfigFile.getList("mapEffects");
+        
+        if (mapEffects != null) {
+          Iterator<?> mapEffectIterator = mapEffects.iterator();
+          while(mapEffectIterator.hasNext()) {
+            Object nextObject = mapEffectIterator.next();
+            if (nextObject instanceof PotionEffect) {
+              map.addMapEffect((PotionEffect) nextObject);
+            }
+          }
+        }
+
+        List<?> playerLoadout = mapConfigFile.getList("playerLoadout");
+
+        if (playerLoadout != null) {
+          ItemStack[] playerLoadoutContents = new ItemStack[36];
+          for (Integer slot = 0; slot < 36; slot++) {
+            Object nextObject = playerLoadout.get(slot);
+            if (nextObject instanceof ItemStack) {
+              playerLoadoutContents[slot] = (ItemStack) nextObject;
+            }
+          }
+          map.setLoadoutContents(playerLoadoutContents);
+        }
 
         ItemStack helmet = mapConfigFile.getItemStack("helmet");
         ItemStack chestplate = mapConfigFile.getItemStack("chestplate");
@@ -152,6 +178,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
         if (map.getCornerB() != null) {
           mapConfigFile.set("cornerB", map.getCornerB());
         }
+
+        if (map.getMapEffects().size() > 0) {
+          mapConfigFile.set("mapEffects", map.getMapEffects());
+        }
         
         mapConfigFile.set("doSideSwitch", map.getDoSideSwitch());
 
@@ -177,6 +207,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
 
         if (map.getHelmet() != null) {
           mapConfigFile.set("helmet", map.getHelmet());
+        }
+
+        if (map.getLoadout() != null) {
+          mapConfigFile.set("playerLoadout", map.getLoadout().getContents());
         }
         
         if (map.getChestplate() != null) {
@@ -471,6 +505,18 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               }
             }
             break;
+          case "loadout":
+            if (args.length > 1) {
+              GameMap map = gameMaps.get(args[1]);
+              if (map != null && sender instanceof Player) {
+                Player player = (Player) sender;
+                Inventory mapLoadoutMenu = map.getLoadout();
+                player.openInventory(mapLoadoutMenu);
+              } else {
+                sender.sendMessage("[EggSplosion] Map doesn't exists, create it to set its equipment");
+              }
+            }
+            break;
           case "gamerule":
             if (args.length > 2) {
               GameMap map = gameMaps.get(args[1]);
@@ -493,6 +539,48 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                 }
               }
             }
+            break;
+          case "effect":
+            if (args.length > 3) {
+              GameMap map = gameMaps.get(args[1]);
+              if (map != null) {
+                Integer amplifier = 1;
+                switch(args.length) {
+                  case 5:
+                    try {
+                      amplifier = Integer.parseInt(args[4]);
+                    } catch (NumberFormatException e) {
+                      // Suppress
+                    }
+                    // Fall Through
+                  case 4:
+                    String potionEffectNameFull = args[3];
+                    if (potionEffectNameFull.split(":").length > 1) {
+                      String potionEffectName = potionEffectNameFull.split(":")[1];
+                      if (args[2].equals("add")) {
+                        PotionEffectType potionEffectType = PotionEffectType.getByName(potionEffectName);
+                        map.addMapEffect(potionEffectType, amplifier);
+                        sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Effect " + ChatColor.GRAY + args[3] + ChatColor.RESET + " Added!");
+                      } else if (args[2].equals("remove")) {
+                        PotionEffect potionEffectToRemove = null;
+                        for (PotionEffect potionEffect: map.getMapEffects()) {
+                          if (potionEffect.getType().getName().equalsIgnoreCase(potionEffectName)) {
+                            potionEffectToRemove = potionEffect;
+                          }
+                        }
+
+                        if (potionEffectToRemove != null) {
+                          map.removeMapEffect(potionEffectToRemove);
+                          sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Effect " + ChatColor.GRAY + args[3] + ChatColor.RESET + " Removed!");
+                        } else {
+                          return false;
+                        }
+                      }
+                      return true;
+                    }
+                }
+              }
+            }
         }
       }
     }
@@ -509,12 +597,16 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
           commands.add("tools");
           commands.add("equip");
           commands.add("gamerule");
+          commands.add("effect");
+          commands.add("loadout");
           return commands;         
         case 2:
           switch(args[0]) {
             case "equip":
             case "gamerule":
             case "tools":
+            case "effect":
+            case "loadout":
               List<String> mapNames = new ArrayList<>();
               Iterator<String> mapNamesIterator = gameMaps.keySet().iterator();
               while (mapNamesIterator.hasNext()) {
@@ -531,17 +623,43 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               List<String> gameRules = new ArrayList<>();
               gameRules.add("doSideSwitch");
               return gameRules;
+            case "effect":
+              List<String> effectCommands = new ArrayList<>();
+              effectCommands.add("add");
+              effectCommands.add("remove");
+              return effectCommands;
             default:
               return new ArrayList<>();
           }
         case 4:
           switch(args[0]) {
             case "gamerule":
-            List<String> trueFalse = new ArrayList<>();
-            trueFalse.add("true");
-            trueFalse.add("false");
-            return trueFalse;
+              List<String> trueFalse = new ArrayList<>();
+              trueFalse.add("true");
+              trueFalse.add("false");
+              return trueFalse;
+            case "effect":
+              switch(args[2]) {
+                case "add":
+                  PotionEffectType[] potionTypes = PotionEffectType.values();
+                  List<String> potionNames = new ArrayList<>();
+                  for (PotionEffectType potionType: potionTypes) {
+                    potionNames.add("minecraft:" + potionType.getName().toLowerCase());
+                  }
+                  return potionNames;
+                case "remove":
+                  GameMap map = gameMaps.get(args[1]);
+                  List<String> mapPotionTypes = new ArrayList<>();
+                  if (map != null) {
+                    for(PotionEffect potionEffect: map.getMapEffects()) {
+                      mapPotionTypes.add("minecraft:" + potionEffect.getType().getName().toLowerCase());
+                    }
+                  }
+                  return mapPotionTypes;
+              }
           }
+        case 5:
+          return new ArrayList<>();
       }
     }
     return null;

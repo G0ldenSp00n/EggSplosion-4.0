@@ -10,14 +10,20 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
 
@@ -50,6 +56,23 @@ public class Lobby {
     if (gameMode == GameMode.WAITING) {
       setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.GRAY, ChatColor.GREEN, false));
     }
+
+    applyMapEffects();
+  }
+
+  public void applyMapEffects() {
+    new BukkitRunnable(){
+        @Override
+        public void run() {
+          if (getMap() != null && getPlayers() != null) {
+            for (Player player: getPlayers()) {
+                for(PotionEffect mapEffect: getMap().getMapEffects()) {
+                  player.addPotionEffect(mapEffect);
+                }
+            }
+          }
+        }
+      }.runTaskTimer(this.plugin, 0, (long) 5 * 20);
   }
 
   public String getLobbyName() {
@@ -112,6 +135,20 @@ public class Lobby {
 
         @Override
         public void run() {
+          if (scoreManager.getScoreType() == ScoreType.TEAM) {
+            Team playerTeam = getScoreboardManager().getPlayerTeam(player);
+            for(Player playerOnTeam : getPlayers()) {
+              if (playerTeam.equals(scoreManager.getPlayerTeam(playerOnTeam))) {
+                Firework firework = (Firework) playerOnTeam.getWorld().spawnEntity(playerOnTeam.getLocation(), EntityType.FIREWORK);
+                FireworkMeta fireworkMeta = firework.getFireworkMeta();
+                FireworkEffect fireworkEffect = FireworkEffect.builder().build();
+                fireworkMeta.addEffect(fireworkEffect);
+                fireworkMeta.setPower(2);
+
+                firework.setFireworkMeta(fireworkMeta);
+              }
+            }
+          }
           if (countDown == 0) {
             cancel();
             loadWaiting();
@@ -465,6 +502,19 @@ public class Lobby {
     player.getInventory().setBoots(setUnbreakable(boots));
   }
 
+  public void equipLoadout(Player player) {
+    if (getMap() != null) {
+      for (ItemStack itemStack: getMap().getLoadout().getContents()) {
+        if (itemStack != null) {
+          player.getInventory().setContents(getMap().getLoadout().getContents());
+          return;
+        }
+      }
+    }
+
+    equipWeapons(player);
+  }
+
   public void equipPlayer(Player player) {
     if (playersInLobby.contains(player)) {
       if (getGameMode() != GameMode.LOBBY) {
@@ -480,14 +530,15 @@ public class Lobby {
 
           ItemStack woodenHoe = new ItemStack(Material.WOODEN_HOE);
           player.getInventory().addItem(woodenHoe);
+          equipLoadout(player);
           break;
         }
         case DEATH_MATCH:
-          equipWeapons(player);
+          equipLoadout(player);
           break;
         case TEAM_DEATH_MATCH:
         case CAPTURE_THE_FLAG:
-          equipWeapons(player);
+          equipLoadout(player);
 
           if (scoreManager != null) {
             if (scoreManager.getPlayerTeam(player).equals(scoreManager.getTeamA())) {
