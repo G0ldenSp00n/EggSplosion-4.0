@@ -28,28 +28,28 @@ public class ArmorRemoveHandler implements Listener {
       if (playerLobby != null) {
         // Helmet Removal
         if (inventoryClickEvent.getSlot() == 39) {
-          if (playerLobby.getMap() != null && playerLobby.getMap().getAllowHelmetRemoval()) {
+          if (playerLobby.getMap() != null && !playerLobby.getMap().getAllowHelmetRemoval()) {
             inventoryClickEvent.setCancelled(true);
           }
         }
 
         // Chestplate Removal
         if (inventoryClickEvent.getSlot() == 38) {
-          if (playerLobby.getMap() != null && playerLobby.getMap().getAllowChestplateRemoval()) {
+          if (playerLobby.getMap() != null && !playerLobby.getMap().getAllowChestplateRemoval()) {
             inventoryClickEvent.setCancelled(true);
           }
         }
 
         // Legging Removal
         if (inventoryClickEvent.getSlot() == 37) {
-          if (playerLobby.getMap() != null && playerLobby.getMap().getAllowLeggingRemoval()) {
+          if (playerLobby.getMap() != null && !playerLobby.getMap().getAllowLeggingRemoval()) {
             inventoryClickEvent.setCancelled(true);
           }
         }
 
         // Boot Removal
         if (inventoryClickEvent.getSlot() == 36) {
-          if (playerLobby.getMap() != null && playerLobby.getMap().getAllowBootRemoval()) {
+          if (playerLobby.getMap() != null && !playerLobby.getMap().getAllowBootRemoval()) {
             inventoryClickEvent.setCancelled(true);
           }
         }

@@ -836,6 +836,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               gameRules.add("pointsToWinDM");
               gameRules.add("allowItemPickup");
               gameRules.add("allowItemDrop");
+              gameRules.add("allowHelmetRemoval");
+              gameRules.add("allowChestplateRemoval");
+              gameRules.add("allowLeggingRemoval");
+              gameRules.add("allowBootRemoval");
               return Utils.FilterTabComplete(args[2], gameRules);
             case "effect":
               List<String> effectCommands = new ArrayList<>();
@@ -853,6 +857,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                 case "doFlagMessages":
                 case "allowItemPickup":
                 case "allowItemDrop":
+                case "allowHelmetRemoval":
+                case "allowChestplateRemoval":
+                case "allowLeggingRemoval":
+                case "allowBootRemoval":
                   List<String> trueFalse = new ArrayList<>();
                   trueFalse.add("true");
                   trueFalse.add("false");

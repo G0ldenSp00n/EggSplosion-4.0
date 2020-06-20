@@ -26,7 +26,7 @@ public class PickupDropHandler implements Listener {
     if (entity instanceof Player) {
       Player player = (Player) entity;
       Lobby playerLobby = lobbyManager.getPlayersLobby(player);
-      if (!playerLobby.getMap().getAllowItemPickup()) {
+      if (playerLobby != null && !playerLobby.getMap().getAllowItemPickup()) {
         entityPickupItemEvent.setCancelled(true);
       }
     }
@@ -36,7 +36,7 @@ public class PickupDropHandler implements Listener {
   public void entityDropItemEvent(PlayerDropItemEvent entityDropItemEvent) {
       Player player = entityDropItemEvent.getPlayer();
       Lobby playerLobby = lobbyManager.getPlayersLobby(player);
-      if (!playerLobby.getMap().getAllowItemDrop()) {
+      if (playerLobby != null && !playerLobby.getMap().getAllowItemDrop()) {
         entityDropItemEvent.setCancelled(true);
       }
   }

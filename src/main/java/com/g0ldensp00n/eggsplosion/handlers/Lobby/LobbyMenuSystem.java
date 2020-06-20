@@ -25,6 +25,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
 
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+
 public class LobbyMenuSystem implements Listener {
 
     private Map<Player, Inventory> Screen_Personal_lobbyMain;
@@ -118,7 +121,7 @@ public class LobbyMenuSystem implements Listener {
 
                 playerInteractEvent.getPlayer().openInventory(Screen_lobbyMain);
               } else {
-                player.sendMessage("[EggSplosion] Can't open lobby menu in main lobby");
+                player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Lobby Menu can't be opened in the Main Lobby"));
               }
             }
           }
