@@ -338,6 +338,9 @@ public class Lobby {
           getMap().spawnFlags();
         } else {
           getMap().clearFlags();
+          if (getMap().getFlagSpawnDelay() > 5 && getMap().getDoFlagMessages()) {
+               broadcastTitle("", "Flags Spawning in " + getMap().getFlagSpawnDelay(), 0, 21, 0);
+          }
           new BukkitRunnable(){
             Integer countDown = getMap().getFlagSpawnDelay();
 
