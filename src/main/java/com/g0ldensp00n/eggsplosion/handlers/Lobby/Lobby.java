@@ -319,20 +319,21 @@ public class Lobby {
     String mapName = tallyGameMapVote();
     broadcastTitle(gameModeToString(gameMode), "Map - " + mapName, 10, 60, 10);
 
+    GameMap map = mapManager.getMapByName(mapName);
     switch(gameMode) {
       case DEATH_MATCH:
-        setScoreManager(new ScoreManager(2, ScoreType.SOLO, this));
-        setMap(mapManager.getMapByName(mapName), ScoreType.SOLO);
+        setScoreManager(new ScoreManager(map.getPointToWinDM(), ScoreType.SOLO, this));
+        setMap(map, ScoreType.SOLO);
         break;
       case TEAM_DEATH_MATCH:
-        setScoreManager(new ScoreManager(15, ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
+        setScoreManager(new ScoreManager(map.getPointToWinTDM(), ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
         randomizeTeams();
-        setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
+        setMap(map, ScoreType.TEAM);
         break;
       case CAPTURE_THE_FLAG:
-        setScoreManager(new ScoreManager(4, ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
+        setScoreManager(new ScoreManager(map.getPointsToWinCTF(), ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
         randomizeTeams();
-        setMap(mapManager.getMapByName(mapName), ScoreType.TEAM);
+        setMap(map, ScoreType.TEAM);
         this.currentMap.spawnFlags();
         break;
       default:

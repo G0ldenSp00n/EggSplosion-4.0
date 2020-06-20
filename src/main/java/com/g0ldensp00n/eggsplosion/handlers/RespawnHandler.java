@@ -57,10 +57,14 @@ public class RespawnHandler implements Listener {
             if (playersLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
               if (player.getInventory().getHelmet() != null) {
                 if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
-                  playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
+                  if (playersLobby.getMap().getDoFlagMessages()) {
+                    playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
+                  }
                   playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamB());
                 } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
-                  playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
+                  if (playersLobby.getMap().getDoFlagMessages()) {
+                    playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
+                  }
                   playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamA());
                 }
                 playersLobby.equipPlayer(player);

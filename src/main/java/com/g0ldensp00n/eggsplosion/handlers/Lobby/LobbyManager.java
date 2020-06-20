@@ -85,7 +85,6 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
     }
 
     public String joinLobby(Lobby lobby, Player player) {
-      String playerJoinMessage = lobby.addPlayer(player);
       if (lobby.hasPlayer(player)) {
         List<Lobby> oldLobbies = new ArrayList<Lobby>(lobbies.values());
         oldLobbies.remove(lobby);
@@ -96,6 +95,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
           }
         }
       }
+      String playerJoinMessage = lobby.addPlayer(player);
       return playerJoinMessage;
     }
 

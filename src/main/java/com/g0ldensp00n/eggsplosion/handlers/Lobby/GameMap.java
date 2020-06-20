@@ -34,8 +34,21 @@ public class GameMap {
   private ItemStack chestplate;
   private ItemStack leggings;
   private ItemStack boots;
-  private Boolean doSideSwitch = false;
   private Material icon;
+
+  // Gamerules
+  private Boolean doSideSwitch = false;
+  private Boolean doFlagMessages = true;
+  private Boolean allowItemPickup = false;
+  private Boolean allowItemDrop = false;
+  private Boolean allowHelmetRemoval = false;
+  private Boolean allowChestplateRemoval = false;
+  private Boolean allowLeggingRemoval = false;
+  private Boolean allowBootRemoval = false;
+  private Integer pointsToWinCTF = 4;
+  private Integer pointsToWinTDM = 15;
+  private Integer pointToWinDM = 15;
+  private Integer flagSpawnDelay = 0;
 
   public GameMap(Location cornerA, Location cornerB) {
     this.cornerA = cornerA;
@@ -97,6 +110,7 @@ public class GameMap {
     mapEffects.remove(effect);
   }
 
+  // Game Rules
   public Boolean getDoSideSwitch() {
     return doSideSwitch;
   }
@@ -105,6 +119,94 @@ public class GameMap {
     this.doSideSwitch = doSideSwitch;
   }
 
+  public Boolean getDoFlagMessages() {
+    return doFlagMessages;
+  }
+
+  public void setDoFlagMessages(Boolean doFlagMessages) {
+    this.doFlagMessages = doFlagMessages;
+  }
+
+  public Boolean getAllowItemPickup() {
+    return allowItemPickup;
+  }
+
+  public void setAllowItemPickup(Boolean allowItemPickup) {
+    this.allowItemPickup = allowItemPickup;
+  }
+
+  public Boolean getAllowItemDrop() {
+    return allowItemDrop;
+  }
+
+  public void setAllowItemDrop(Boolean allowItemDrop) {
+    this.allowItemDrop = allowItemDrop;
+  }
+
+  public Boolean getAllowHelmetRemoval() {
+    return allowHelmetRemoval;
+  }
+
+  public void setAllowHelmetRemoval(Boolean allowHelmetRemoval) {
+    this.allowHelmetRemoval = allowHelmetRemoval;
+  }
+
+  public Boolean getAllowChestplateRemoval() {
+    return allowChestplateRemoval;
+  }
+
+  public void setAllowChestplateRemoval(Boolean allowChestplateRemoval) {
+    this.allowChestplateRemoval = allowChestplateRemoval;
+  }
+
+  public Boolean getAllowLeggingRemoval() {
+    return allowLeggingRemoval;
+  }
+
+  public void setAllowLeggingRemoval(Boolean allowLeggingRemoval) {
+    this.allowLeggingRemoval = allowLeggingRemoval;
+  }
+
+  public Boolean getAllowBootRemoval() {
+    return allowBootRemoval;
+  }
+
+  public void setAllowBootRemoval(Boolean allowBootRemoval) {
+    this.allowBootRemoval = allowBootRemoval;
+  }
+
+  public Integer getFlagSpawnDelay() {
+    return flagSpawnDelay;
+  }
+
+  public void setFlagSpawnDelay(Integer flagSpawnDelay) {
+    this.flagSpawnDelay = flagSpawnDelay;
+  }
+
+  public Integer getPointsToWinCTF() {
+    return pointsToWinCTF;
+  }
+
+  public void setPointsToWinCTF(Integer pointsToWinCTF) {
+    this.pointsToWinCTF = pointsToWinCTF;
+  }
+
+  public Integer getPointToWinTDM() {
+    return pointsToWinTDM;
+  }
+
+  public void setPointToWinTDM(Integer pointsToWinTDM) {
+    this.pointsToWinTDM = pointsToWinTDM;
+  }
+
+  public Integer getPointToWinDM() {
+    return pointToWinDM;
+  }
+
+  public void setPointToWinDM(Integer pointToWinDM) {
+    this.pointToWinDM = pointToWinDM;
+  }
+  
   public ItemStack getHelmet() {
     if (helmet != null) {
       return helmet.clone();
@@ -188,6 +290,7 @@ public class GameMap {
   }
 
   public void randomizeTeamSides(List<Team> teams) {
+    teamSide = new Hashtable<Team, Integer>();
     if (doSideSwitch) {
       Random random = new Random();
       List<Team> teamsToAdd = new ArrayList<>(teams);
