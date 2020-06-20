@@ -50,7 +50,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
           }
         }
       }
-      return null;
+      return getMainLobby();
     }
 
     public Lobby getMainLobby() {

@@ -158,6 +158,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
           }
         }
 
+        if (mapConfigFile.getItemStack("mapIcon") != null) {
+          map.setMapIcon(mapConfigFile.getItemStack("mapIcon").getType());
+        }
+
         gameMaps.put(fileName, map);
       }
     }
@@ -181,6 +185,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
 
         if (map.getMapEffects().size() > 0) {
           mapConfigFile.set("mapEffects", map.getMapEffects());
+        }
+
+        if (map.getMapIcon() != null) {
+          mapConfigFile.set("mapIcon", createMapTool(map.getMapIcon(), "mapIcon"));
         }
         
         mapConfigFile.set("doSideSwitch", map.getDoSideSwitch());
@@ -581,6 +589,21 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                 }
               }
             }
+            break;
+          case "icon":
+            GameMap map = gameMaps.get(args[1]);
+            if (map != null) {
+              if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (player.getInventory().getItemInMainHand() != null) {
+                  map.setMapIcon(player.getInventory().getItemInMainHand().getType());
+                  player.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Icon Set to: " + ChatColor.DARK_GRAY + player.getInventory().getItemInMainHand().getType().name().toLowerCase());
+                } else {
+                  player.sendMessage("[EggSplosion] Hold an item in your hand to set it as the map icon");
+                }
+                return true;
+              }
+            }
         }
       }
     }
@@ -599,6 +622,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
           commands.add("gamerule");
           commands.add("effect");
           commands.add("loadout");
+          commands.add("icon");
           return commands;         
         case 2:
           switch(args[0]) {
@@ -607,6 +631,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
             case "tools":
             case "effect":
             case "loadout":
+            case "icon":
               List<String> mapNames = new ArrayList<>();
               Iterator<String> mapNamesIterator = gameMaps.keySet().iterator();
               while (mapNamesIterator.hasNext()) {

@@ -17,7 +17,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -26,6 +25,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
+
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Lobby {
   private Plugin plugin;
@@ -141,7 +143,7 @@ public class Lobby {
               if (playerTeam.equals(scoreManager.getPlayerTeam(playerOnTeam))) {
                 Firework firework = (Firework) playerOnTeam.getWorld().spawnEntity(playerOnTeam.getLocation(), EntityType.FIREWORK);
                 FireworkMeta fireworkMeta = firework.getFireworkMeta();
-                FireworkEffect fireworkEffect = FireworkEffect.builder().build();
+                FireworkEffect fireworkEffect = FireworkEffect.builder().withColor(Color.WHITE).build();
                 fireworkMeta.addEffect(fireworkEffect);
                 fireworkMeta.setPower(2);
 
@@ -295,13 +297,6 @@ public class Lobby {
   }
 
   public void setScoreManager(ScoreManager scoreManager) {
-    if (scoreManager != null) {
-      if (scoreManager.getTeamA() != null) {
-        for (Player player: getPlayers()) {
-          player.setDisplayName(player.getName());
-        }
-      }
-    }
     this.scoreManager = scoreManager;
     for(Player player : getPlayers()) {
       scoreManager.setPlayerScoreboard(player);
@@ -312,10 +307,11 @@ public class Lobby {
   public void loadWaiting() {
     setGameMode(GameMode.WAITING);
     setMap(mapManager.getMapByName("WAITING_ROOM"), ScoreType.SOLO);
+    setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.GRAY, ChatColor.GREEN, false));
     for (Player player: getPlayers()) {
       unreadyPlayer(player);
+      equipPlayer(player);
     }
-    setScoreManager(new ScoreManager(ScoreType.TRACKING, this, ChatColor.GRAY, ChatColor.GREEN, false));
   }
 
   public void startGame() {
@@ -556,10 +552,25 @@ public class Lobby {
     }
   }
 
-  public void broadcastMessage(String message) {
+  public void broadcastMessageTypeMessage(ChatMessageType chatMessageType , String message) {
     for(Player player: playersInLobby) {
-      player.sendMessage(message);
+      player.spigot().sendMessage(chatMessageType, new TextComponent(message));
     }
+  }
+
+  public void broadcastActionBar(String message, Boolean includeChatMessage) {
+    broadcastMessageTypeMessage(ChatMessageType.ACTION_BAR, message);
+    if (includeChatMessage) {
+      broadcastMessage(message);
+    }
+  }
+
+  public void broadcastActionBar(String message) {
+    broadcastActionBar(message, false);
+  }
+
+  public void broadcastMessage(String message) {
+    broadcastMessageTypeMessage(ChatMessageType.CHAT, message);
   }
 
   public void broadcastTitle(String title, String subTitle, int fadeIn, int stay, int fadeOut) {
@@ -627,6 +638,9 @@ public class Lobby {
     if (scoreType == ScoreType.TEAM) {
       map.randomizeTeamSides(scoreManager.getTeams());
     }
+    for(Player player: getPlayers()) {
+      player.getActivePotionEffects().clear();
+    }
     spawnPlayersInMap(scoreType);
   }
 
@@ -644,6 +658,13 @@ public class Lobby {
 
   private void removePlayerCleanup(Player player) {
     if (scoreManager != null) {
+      if (scoreManager.getTeamA() != null) {
+        scoreManager.getTeamA().removeEntry(player.getName());
+      }
+      
+      if (scoreManager.getTeamB() != null) {
+        scoreManager.getTeamB().removeEntry(player.getName());
+      }
       player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
     }
   }

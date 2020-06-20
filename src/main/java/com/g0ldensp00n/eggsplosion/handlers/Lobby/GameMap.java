@@ -35,6 +35,7 @@ public class GameMap {
   private ItemStack leggings;
   private ItemStack boots;
   private Boolean doSideSwitch = false;
+  private Material icon;
 
   public GameMap(Location cornerA, Location cornerB) {
     this.cornerA = cornerA;
@@ -45,10 +46,20 @@ public class GameMap {
 
     soloSpawnLocations = new ArrayList<Location>();
     sideSpawnLocations = new Hashtable<Integer, List<Location>>();
+    sideSpawnLocations.put(0, new ArrayList<Location>());
+    sideSpawnLocations.put(1, new ArrayList<Location>());
     sideFlagLocation = new Hashtable<Integer, Location>();
 
     supportedGameModes = new ArrayList<GameMode>();
     mapEffects = new ArrayList<PotionEffect>();
+  }
+
+  public Material getMapIcon() {
+    return icon;
+  }
+
+  public void setMapIcon(Material icon) {
+    this.icon = icon;
   }
 
   public Location getCornerA() {
@@ -172,6 +183,7 @@ public class GameMap {
         return entry.getKey();
       }
     }
+    Bukkit.getLogger().warning("Side " + side + " does not exist in " + teamSide);
     return null;
   }
 
@@ -197,15 +209,15 @@ public class GameMap {
   }
 
   public void switchTeamSides() {
+    Map<Team, Integer> newTeamSide = new Hashtable<Team, Integer>();
     if (doSideSwitch) {
-      Team sideOneTeam = getSideTeam(0); 
-      for (Integer side = 0; side < teamSide.size(); side++) {
-        Team team = getSideTeam(side);
-        teamSide.put(team, side - 1);
+      newTeamSide.put(getSideTeam(0), teamSide.size()-1);
+      for (Integer side = 1; side < teamSide.size(); side++) {
+        newTeamSide.put(getSideTeam(side), side - 1);
       }
-
-      teamSide.put(sideOneTeam, teamSide.size()-1);
     }
+
+    teamSide = newTeamSide;
   }
 
   public Integer getTeamSide(Team team) {

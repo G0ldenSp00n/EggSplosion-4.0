@@ -2,7 +2,6 @@ package com.g0ldensp00n.eggsplosion.handlers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Location;
@@ -12,10 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scoreboard.ScoreboardManager;
 
 import java.util.*;
 
@@ -61,10 +57,10 @@ public class RespawnHandler implements Listener {
             if (playersLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
               if (player.getInventory().getHelmet() != null) {
                 if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
-                  playersLobby.broadcastMessage(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag");
+                  playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
                   playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamB());
                 } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
-                  playersLobby.broadcastMessage(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag");
+                  playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
                   playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamA());
                 }
                 playersLobby.equipPlayer(player);

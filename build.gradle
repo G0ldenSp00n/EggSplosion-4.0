@@ -28,8 +28,13 @@ bukkit {
     }
 }
 
+repositories {
+    spigot() // Adds spigot repo
+}
+
 // Let's add needed API to project
 dependencies {
-    compileOnly bukkit() 
+    compileOnly spigotApi()
+    compileOnly spigot()
     // see section 'Dependencies' for more info
 }

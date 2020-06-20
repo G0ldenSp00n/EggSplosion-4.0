@@ -131,8 +131,13 @@ public class LobbyMenuSystem implements Listener {
       Map<String, GameMap> maps = mapManager.getMaps();
       for (String mapName: maps.keySet()) {
         if (!mapName.equalsIgnoreCase("WAITING_ROOM")) {
-          ItemStack mapSeletButton = createMenuButton(Material.MAP, mapName);
-          Screen_mapSelect.addItem(mapSeletButton);
+          ItemStack mapSelectButton;
+          if (maps.get(mapName).getMapIcon() != null) {
+            mapSelectButton = createMenuButton(maps.get(mapName).getMapIcon(), mapName);
+          } else {
+            mapSelectButton = createMenuButton(Material.MAP, mapName);
+          }
+          Screen_mapSelect.addItem(mapSelectButton);
         }
       }
     }
