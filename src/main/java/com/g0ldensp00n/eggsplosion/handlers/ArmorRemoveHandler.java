@@ -21,7 +21,6 @@ public class ArmorRemoveHandler implements Listener {
 
   @EventHandler
   public void inventoryClickEvent(InventoryClickEvent inventoryClickEvent) {
-    Bukkit.getLogger().info("Clicked Slot: " + inventoryClickEvent.getSlot() + " Slot Type: " + inventoryClickEvent.getSlotType());
     if (inventoryClickEvent.getSlotType().equals(SlotType.ARMOR) && inventoryClickEvent.getWhoClicked() instanceof Player) {
       Lobby playerLobby = lobbyManager.getPlayersLobby((Player) inventoryClickEvent.getWhoClicked());
 

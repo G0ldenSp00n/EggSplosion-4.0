@@ -120,6 +120,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
           map.setPointToWinDM(mapConfigFile.getInt("pointsToWinDM"));
         }
 
+        if (mapConfigFile.getInt("flagSpawnDelay") != 0) {
+          map.setFlagSpawnDelay(mapConfigFile.getInt("flagSpawnDelay"));
+        }
+
         List<?> mapEffects = mapConfigFile.getList("mapEffects");
         
         if (mapEffects != null) {
@@ -218,6 +222,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
         mapConfigFile.set("pointsToWinCTF", map.getPointsToWinCTF());
         mapConfigFile.set("pointsToWinTDM", map.getPointToWinTDM());
         mapConfigFile.set("pointsToWinDM", map.getPointToWinDM());
+        mapConfigFile.set("flagSpawnDelay", map.getFlagSpawnDelay());
         mapConfigFile.set("allowItemDrop", map.getAllowItemDrop());
         mapConfigFile.set("allowItemPickup", map.getAllowItemPickup());
         mapConfigFile.set("allowHelmetRemoval", map.getAllowHelmetRemoval());
@@ -596,6 +601,9 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                     case "allowBootRemoval":
                       sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule allowBootRemoval is currently set to: " + map.getAllowBootRemoval());
                       break;
+                    case "flagSpawnDelay":
+                      sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule flagSpawnDelay is currently set to: " + map.getFlagSpawnDelay());
+                      break;
                     default:
                       return false;
                   }
@@ -723,6 +731,17 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                       map.setPointToWinDM(pointsToWinDM);
                       sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinCTF is now set to: " + pointsToWinDM);
                       return true;
+                    case "flagSpawnDelay":
+                      Integer flagSpawnDelay;
+                      try {
+                        flagSpawnDelay = Integer.parseInt(args[3]);
+                      } catch (NumberFormatException e) {
+                        sender.sendMessage("[EggSplosion] You must specify the points");
+                        return true;
+                      }
+                      map.setFlagSpawnDelay(flagSpawnDelay);
+                      sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule flagSpawnDelay is now set to: " + flagSpawnDelay);
+                      return true;
                     default:
                       return false;
                   }
@@ -840,6 +859,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               gameRules.add("allowChestplateRemoval");
               gameRules.add("allowLeggingRemoval");
               gameRules.add("allowBootRemoval");
+              gameRules.add("flagSpawnDelay");
               return Utils.FilterTabComplete(args[2], gameRules);
             case "effect":
               List<String> effectCommands = new ArrayList<>();
@@ -868,6 +888,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                 case "pointsToWinCTF":
                 case "pointsToWinTDM":
                 case "pointsToWinDM":
+                case "flagSpawnDelay":
                   return new ArrayList<>();
               }
             case "effect":

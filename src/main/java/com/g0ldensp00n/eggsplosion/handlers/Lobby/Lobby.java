@@ -334,7 +334,26 @@ public class Lobby {
         setScoreManager(new ScoreManager(map.getPointsToWinCTF(), ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
         randomizeTeams();
         setMap(map, ScoreType.TEAM);
-        this.currentMap.spawnFlags();
+        if (getMap().getFlagSpawnDelay() == 0) {
+          getMap().spawnFlags();
+        } else {
+          getMap().clearFlags();
+          new BukkitRunnable(){
+            Integer countDown = getMap().getFlagSpawnDelay();
+
+            @Override
+            public void run() {
+              if (countDown == 0) {
+                cancel();
+                getMap().spawnFlags();
+                return;
+              } else if (countDown <= 5){
+                broadcastTitle("", "Flag Spawning in " + countDown, 0, 21, 0);
+              }
+              countDown--;
+            }
+          }.runTaskTimer(this.plugin, 0, (long) 20);
+        }
         break;
       default:
         break;

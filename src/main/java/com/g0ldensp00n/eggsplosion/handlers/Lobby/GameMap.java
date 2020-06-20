@@ -351,9 +351,24 @@ public class GameMap {
     teamFlag.setType(flagType);
   }
 
+  public void clearFlag(Integer side) {
+    Location flagLocation = getSideFlagLocation(side).clone();
+
+    flagLocation.add(0, 1, 0);
+    Block teamFlag = flagLocation.getBlock();
+
+    teamFlag.setType(Material.AIR);
+  }
+
   public void spawnFlags() {
     for (int side = 0; side < sideFlagLocation.size(); side++) {
       spawnFlag(side);
+    }
+  }
+
+  public void clearFlags() {
+    for (int side = 0; side < sideFlagLocation.size(); side++) {
+      clearFlag(side);
     }
   }
 
