@@ -348,7 +348,9 @@ public class Lobby {
                 getMap().spawnFlags();
                 return;
               } else if (countDown <= 5){
-                broadcastTitle("", "Flag Spawning in " + countDown, 0, 21, 0);
+                if (getMap().getDoFlagMessages()) {
+                  broadcastTitle("", "Flags Spawning in " + countDown, 0, 21, 0);
+                }
               }
               countDown--;
             }
