@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.g0ldensp00n.eggsplosion.handlers.Utils.Utils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -623,7 +625,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
           commands.add("effect");
           commands.add("loadout");
           commands.add("icon");
-          return commands;         
+          return Utils.FilterTabComplete(args[0], commands);         
         case 2:
           switch(args[0]) {
             case "equip":
@@ -637,7 +639,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               while (mapNamesIterator.hasNext()) {
                 mapNames.add(mapNamesIterator.next());
               }
-              return mapNames;
+              return Utils.FilterTabComplete(args[1], mapNames);
             case "create":
             default:
               return new ArrayList<>();
@@ -647,12 +649,12 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
             case "gamerule":
               List<String> gameRules = new ArrayList<>();
               gameRules.add("doSideSwitch");
-              return gameRules;
+              return Utils.FilterTabComplete(args[2], gameRules);
             case "effect":
               List<String> effectCommands = new ArrayList<>();
               effectCommands.add("add");
               effectCommands.add("remove");
-              return effectCommands;
+              return Utils.FilterTabComplete(args[2], effectCommands);
             default:
               return new ArrayList<>();
           }
@@ -662,7 +664,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               List<String> trueFalse = new ArrayList<>();
               trueFalse.add("true");
               trueFalse.add("false");
-              return trueFalse;
+              return Utils.FilterTabComplete(args[3], trueFalse);
             case "effect":
               switch(args[2]) {
                 case "add":
@@ -671,7 +673,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                   for (PotionEffectType potionType: potionTypes) {
                     potionNames.add("minecraft:" + potionType.getName().toLowerCase());
                   }
-                  return potionNames;
+                  return Utils.FilterTabComplete(args[3], potionNames);
                 case "remove":
                   GameMap map = gameMaps.get(args[1]);
                   List<String> mapPotionTypes = new ArrayList<>();
@@ -680,7 +682,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                       mapPotionTypes.add("minecraft:" + potionEffect.getType().getName().toLowerCase());
                     }
                   }
-                  return mapPotionTypes;
+                  return Utils.FilterTabComplete(args[3], mapPotionTypes);
               }
           }
         case 5:

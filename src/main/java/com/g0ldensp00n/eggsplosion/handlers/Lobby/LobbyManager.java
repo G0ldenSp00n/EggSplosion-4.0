@@ -8,6 +8,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import java.util.*;
+
+import com.g0ldensp00n.eggsplosion.handlers.Utils.Utils;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -212,7 +215,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
             commands.add("join");
             commands.add("leave");
             commands.add("list");
-            return commands;         
+            return Utils.FilterTabComplete(args[0], commands);         
           case 2:
             switch(args[0]) {
               case "join":
@@ -221,7 +224,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
                 while (lobbyNamesIterator.hasNext()) {
                   lobbyNames.add(lobbyNamesIterator.next());
                 }
-                return lobbyNames;
+                return Utils.FilterTabComplete(args[1], lobbyNames);
               case "create":
               case "list":
               case "leave":
