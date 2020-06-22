@@ -1,4 +1,4 @@
-package com.g0ldensp00n.eggsplosion.handlers.Lobby;
+package com.g0ldensp00n.eggsplosion.handlers.GameModeManager;
 
 public enum GameMode {
   LOBBY,

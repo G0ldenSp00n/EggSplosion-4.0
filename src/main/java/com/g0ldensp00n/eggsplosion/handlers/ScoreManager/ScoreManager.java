@@ -1,7 +1,10 @@
-package com.g0ldensp00n.eggsplosion.handlers.Lobby;
+package com.g0ldensp00n.eggsplosion.handlers.ScoreManager;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameLobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -156,10 +159,13 @@ public class ScoreManager {
           break;
       }
 
-      if (scoreToWin != -1 && (newScore >= scoreToWin)) {
-        lobby.playerWon(player);
-      } else if (scoreToWin != -1 && shouldRotate) {
-        lobby.rotateSides();
+      if (lobby instanceof GameLobby) {
+        GameLobby gameLobby = (GameLobby) lobby;
+        if (scoreToWin != -1 && (newScore >= scoreToWin)) {
+          gameLobby.playerWon(player);
+        } else if (scoreToWin != -1 && shouldRotate) {
+          gameLobby.rotateSides();
+        }
       }
     }
   }

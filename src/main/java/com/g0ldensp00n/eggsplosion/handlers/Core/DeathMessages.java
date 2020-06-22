@@ -1,12 +1,12 @@
-package com.g0ldensp00n.eggsplosion.handlers;
+package com.g0ldensp00n.eggsplosion.handlers.Core;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameMode;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.Lobby;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -49,13 +49,13 @@ public class DeathMessages implements Listener {
             damager.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
             Lobby damagerLobby = lobbyManager.getPlayersLobby(damager);
             if (damagerLobby.getGameMode() == GameMode.DEATH_MATCH || damagerLobby.getGameMode() == GameMode.TEAM_DEATH_MATCH) {
-              damagerLobby.getScoreboardManager().addScorePlayer(damager);
+              damagerLobby.getScoreManager().addScorePlayer(damager);
             }
 
             Random random = new Random();
             String deathMessage = deathMessagesPlayerOnPlayer.get(random.nextInt(deathMessagesPlayerOnPlayer.size()));
             if (damagerLobby != null) {
-              damagerLobby.broadcastMessage(damagerLobby.getScoreboardManager().getPlayerDisplayName(player) + " " + deathMessage + " " + damagerLobby.getScoreboardManager().getPlayerDisplayName(damager));
+              damagerLobby.broadcastMessage(damagerLobby.getScoreManager().getPlayerDisplayName(player) + " " + deathMessage + " " + damagerLobby.getScoreManager().getPlayerDisplayName(damager));
             }
           } else {
             damager.playSound(damager.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1, 1);

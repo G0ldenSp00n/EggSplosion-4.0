@@ -1,7 +1,7 @@
-package com.g0ldensp00n.eggsplosion.handlers;
+package com.g0ldensp00n.eggsplosion.handlers.Core;
 
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.Lobby;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;

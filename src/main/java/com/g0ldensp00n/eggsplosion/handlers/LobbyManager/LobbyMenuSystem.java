@@ -1,10 +1,16 @@
-package com.g0ldensp00n.eggsplosion.handlers.Lobby;
-
+package com.g0ldensp00n.eggsplosion.handlers.LobbyManager;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+
+import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.MainLobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.WaitingLobby;
+import com.g0ldensp00n.eggsplosion.handlers.MapManager.GameMap;
+import com.g0ldensp00n.eggsplosion.handlers.MapManager.MapManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -96,7 +102,7 @@ public class LobbyMenuSystem implements Listener {
             if (playerInteractEvent.getItem().getType().equals(Material.EMERALD)) {
               Player player = playerInteractEvent.getPlayer();
 
-              if (lobbyManager.getPlayersLobby(player) != lobbyManager.getMainLobby()) {
+              if (!(lobbyManager.getPlayersLobby(player) instanceof MainLobby)) {
                 Inventory Screen_lobbyMain;
                 // Main Screen
                 if(Screen_Personal_lobbyMain.containsKey(player)) {
@@ -109,17 +115,23 @@ public class LobbyMenuSystem implements Listener {
                 UI_Button_gameModeSelect = createMenuButton(Material.FIREWORK_ROCKET, "Game Mode Select");
                 UI_Button_mapSelect = createMenuButton(Material.MAP, "Map Select");
                 ItemStack UI_Button_ReadyUnready;
-                if (lobbyManager.getPlayersLobby(player).isPlayerReady(player)) {
-                  UI_Button_ReadyUnready = createMenuButton(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "Unready");
+                Lobby playerLobby = lobbyManager.getPlayersLobby(player);
+                if (playerLobby instanceof WaitingLobby) {
+                  WaitingLobby waitingLobby = (WaitingLobby) playerLobby;
+                  if (waitingLobby.isPlayerReady(player)) {
+                    UI_Button_ReadyUnready = createMenuButton(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "Unready");
+                  } else {
+                    UI_Button_ReadyUnready = createMenuButton(Material.GREEN_STAINED_GLASS_PANE, ChatColor.GREEN + "Ready");
+                  }
+
+                  Screen_lobbyMain.setItem(12, UI_Button_gameModeSelect);
+                  Screen_lobbyMain.setItem(14, UI_Button_mapSelect);
+                  Screen_lobbyMain.setItem(22, UI_Button_ReadyUnready);
+
+                  playerInteractEvent.getPlayer().openInventory(Screen_lobbyMain);
                 } else {
-                  UI_Button_ReadyUnready = createMenuButton(Material.GREEN_STAINED_GLASS_PANE, ChatColor.GREEN + "Ready");
+                  player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Lobby Menu can only be opened in the waiting room"));
                 }
-
-                Screen_lobbyMain.setItem(12, UI_Button_gameModeSelect);
-                Screen_lobbyMain.setItem(14, UI_Button_mapSelect);
-                Screen_lobbyMain.setItem(22, UI_Button_ReadyUnready);
-
-                playerInteractEvent.getPlayer().openInventory(Screen_lobbyMain);
               } else {
                 player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Lobby Menu can't be opened in the Main Lobby"));
               }
@@ -151,7 +163,10 @@ public class LobbyMenuSystem implements Listener {
         inventoryClickEvent.setCancelled(true);
         Player player = (Player) inventoryClickEvent.getWhoClicked();
         ItemStack clickedItem = inventoryClickEvent.getCurrentItem();
-        if (clickedItem != null) {
+        Lobby playersLobby = lobbyManager.getPlayersLobby(player);
+
+        if (clickedItem != null && playersLobby instanceof WaitingLobby) {
+          WaitingLobby waitingLobby = (WaitingLobby) playersLobby;
           if (clickedItem.equals(UI_Button_gameModeSelect)) {
             player.openInventory(Screen_gameModeSelect);
           } else if (clickedItem.equals(UI_Button_mapSelect)) {
@@ -159,27 +174,28 @@ public class LobbyMenuSystem implements Listener {
             player.openInventory(Screen_mapSelect);
           } else if (clickedItem.equals(UI_Button_ctfGameMode)) {
             player.closeInventory();
-            lobbyManager.getPlayersLobby(player).registerGameModeVote(GameMode.CAPTURE_THE_FLAG, player);
+            waitingLobby.registerGameModeVote(GameMode.CAPTURE_THE_FLAG, player);
           } else if (clickedItem.equals(UI_Button_tdmGameMode)) {
             player.closeInventory();
-            lobbyManager.getPlayersLobby(player).registerGameModeVote(GameMode.TEAM_DEATH_MATCH, player);
+            waitingLobby.registerGameModeVote(GameMode.TEAM_DEATH_MATCH, player);
           } else if (clickedItem.equals(UI_Button_dmGameMode)) {
             player.closeInventory();
-            lobbyManager.getPlayersLobby(player).registerGameModeVote(GameMode.DEATH_MATCH, player);
-          } else if (inventoryClickEvent.getSlot() == 22 && clickedItem.getType() == Material.GREEN_STAINED_GLASS_PANE) {
-            lobbyManager.getPlayersLobby(player).readyPlayer(player);
-            ItemStack UI_Button_ReadyUnready = createMenuButton(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "Unready");
-            inventoryClickEvent.getInventory().setItem(22, UI_Button_ReadyUnready);
-          } else if (inventoryClickEvent.getSlot() == 22 && clickedItem.getType() == Material.RED_STAINED_GLASS_PANE) {
-            lobbyManager.getPlayersLobby(player).unreadyPlayer(player);
-            ItemStack UI_Button_ReadyUnready = createMenuButton(Material.GREEN_STAINED_GLASS_PANE, ChatColor.GREEN + "Ready");
+            waitingLobby.registerGameModeVote(GameMode.DEATH_MATCH, player);
+          } else if (inventoryClickEvent.getSlot() == 22) {
+            waitingLobby.togglePlayerReady(player);
+            ItemStack UI_Button_ReadyUnready;
+            if (waitingLobby.isPlayerReady(player)) {
+              UI_Button_ReadyUnready = createMenuButton(Material.RED_STAINED_GLASS_PANE, ChatColor.RED + "Unready");
+            } else {
+              UI_Button_ReadyUnready = createMenuButton(Material.GREEN_STAINED_GLASS_PANE, ChatColor.GREEN + "Ready");
+            }
             inventoryClickEvent.getInventory().setItem(22, UI_Button_ReadyUnready);
           }
 
           if (inventoryClickEvent.getInventory().equals(Screen_mapSelect)) {
             String mapName = clickedItem.getItemMeta().getDisplayName().substring(2);
             player.closeInventory();
-            lobbyManager.getPlayersLobby(player).registerMapVote(mapName, player);
+            waitingLobby.registerMapVote(mapName, player);
           }
           player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
         }

@@ -1,3 +1,4 @@
+/*
 package com.g0ldensp00n.eggsplosion.handlers.Lobby;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import org.bukkit.scoreboard.Team;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 
-public class Lobby {
+public class LobbyDepricated {
   private Plugin plugin;
   private List<Player> playersInLobby;
   private Map<Player, GameMode> gameModeVotes;
@@ -715,3 +716,4 @@ public class Lobby {
     return currentMap;
   }
 }
+*/
