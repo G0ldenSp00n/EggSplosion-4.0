@@ -1,4 +1,4 @@
-package com.g0ldensp00n.eggsplosion.handlers.Lobby;
+package com.g0ldensp00n.eggsplosion.handlers.MapManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
 import com.g0ldensp00n.eggsplosion.handlers.Utils.Utils;
 
 import org.bukkit.Bukkit;
@@ -113,11 +115,11 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
         }
         
         if (mapConfigFile.getInt("pointsToWinTDM") != 0) {
-          map.setPointToWinTDM(mapConfigFile.getInt("pointsToWinTDM"));
+          map.setPointsToWinTDM(mapConfigFile.getInt("pointsToWinTDM"));
         }
 
         if (mapConfigFile.getInt("pointsToWinDM") != 0) {
-          map.setPointToWinDM(mapConfigFile.getInt("pointsToWinDM"));
+          map.setPointsToWinDM(mapConfigFile.getInt("pointsToWinDM"));
         }
 
         if (mapConfigFile.getInt("flagSpawnDelay") != 0) {
@@ -220,8 +222,8 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
         mapConfigFile.set("doSideSwitch", map.getDoSideSwitch());
         mapConfigFile.set("doFlagMessages", map.getDoFlagMessages());
         mapConfigFile.set("pointsToWinCTF", map.getPointsToWinCTF());
-        mapConfigFile.set("pointsToWinTDM", map.getPointToWinTDM());
-        mapConfigFile.set("pointsToWinDM", map.getPointToWinDM());
+        mapConfigFile.set("pointsToWinTDM", map.getPointsToWinTDM());
+        mapConfigFile.set("pointsToWinDM", map.getPointsToWinDM());
         mapConfigFile.set("flagSpawnDelay", map.getFlagSpawnDelay());
         mapConfigFile.set("allowItemDrop", map.getAllowItemDrop());
         mapConfigFile.set("allowItemPickup", map.getAllowItemPickup());
@@ -584,10 +586,10 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                       sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinCTF is currently set to: " + map.getPointsToWinCTF());
                       break;
                     case "pointsToWinTDM":
-                      sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinTDM is currently set to: " + map.getPointToWinTDM());
+                      sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinTDM is currently set to: " + map.getPointsToWinTDM());
                       break;
                     case "pointsToWinDM":
-                      sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinDM is currently set to: " + map.getPointToWinDM());
+                      sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinDM is currently set to: " + map.getPointsToWinDM());
                       break;
                     case "allowHelmetRemoval":
                       sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule allowHelmetRemoval is currently set to: " + map.getAllowHelmetRemoval());
@@ -717,7 +719,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                         sender.sendMessage("[EggSplosion] You must specify the points");
                         return true;
                       }
-                      map.setPointToWinTDM(pointsToWinTDM);
+                      map.setPointsToWinTDM(pointsToWinTDM);
                       sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinCTF is now set to: " + pointsToWinTDM);
                       return true;
                     case "pointsToWinDM":
@@ -728,7 +730,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                         sender.sendMessage("[EggSplosion] You must specify the points");
                         return true;
                       }
-                      map.setPointToWinDM(pointsToWinDM);
+                      map.setPointsToWinDM(pointsToWinDM);
                       sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Gamerule pointsToWinCTF is now set to: " + pointsToWinDM);
                       return true;
                     case "flagSpawnDelay":

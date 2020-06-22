@@ -1,4 +1,4 @@
-package com.g0ldensp00n.eggsplosion.handlers.Lobby;
+package com.g0ldensp00n.eggsplosion.handlers.MapManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
+
+import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -47,7 +49,7 @@ public class GameMap {
   private Boolean allowBootRemoval = false;
   private Integer pointsToWinCTF = 4;
   private Integer pointsToWinTDM = 15;
-  private Integer pointToWinDM = 15;
+  private Integer pointsToWinDM = 15;
   private Integer flagSpawnDelay = 0;
 
   public GameMap(Location cornerA, Location cornerB) {
@@ -191,20 +193,20 @@ public class GameMap {
     this.pointsToWinCTF = pointsToWinCTF;
   }
 
-  public Integer getPointToWinTDM() {
+  public Integer getPointsToWinTDM() {
     return pointsToWinTDM;
   }
 
-  public void setPointToWinTDM(Integer pointsToWinTDM) {
+  public void setPointsToWinTDM(Integer pointsToWinTDM) {
     this.pointsToWinTDM = pointsToWinTDM;
   }
 
-  public Integer getPointToWinDM() {
-    return pointToWinDM;
+  public Integer getPointsToWinDM() {
+    return pointsToWinDM;
   }
 
-  public void setPointToWinDM(Integer pointToWinDM) {
-    this.pointToWinDM = pointToWinDM;
+  public void setPointsToWinDM(Integer pointToWinDM) {
+    this.pointsToWinDM = pointsToWinDM;
   }
   
   public ItemStack getHelmet() {

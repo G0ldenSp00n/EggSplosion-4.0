@@ -1,4 +1,4 @@
-package com.g0ldensp00n.eggsplosion.handlers.Lobby;
+package com.g0ldensp00n.eggsplosion.handlers.LobbyManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,6 +9,11 @@ import org.bukkit.command.TabCompleter;
 
 import java.util.*;
 
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.MainLobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.WaitingLobby;
+import com.g0ldensp00n.eggsplosion.handlers.MapManager.GameMap;
+import com.g0ldensp00n.eggsplosion.handlers.MapManager.MapManager;
 import com.g0ldensp00n.eggsplosion.handlers.Utils.Utils;
 
 import org.bukkit.entity.Player;
@@ -38,7 +43,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
       this.lobbies = new Hashtable<String, Lobby>();
       
       Bukkit.getPluginManager().registerEvents(this, plugin);
-      mainLobby = new Lobby(plugin, mapManager, "MAIN_LOBBY", GameMode.LOBBY, -1, null);
+      mainLobby = (Lobby) new MainLobby(plugin);
       if (Bukkit.getOnlinePlayers().size() > 0) {
         mainLobby.addPlayers(Bukkit.getOnlinePlayers());
       }
@@ -60,8 +65,12 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
       return mainLobby;
     }
 
-    public Lobby addLobby(GameMode gameMode, Integer maxPlayers, String lobbyName, GameMap map) {
-      Lobby addedLobby = new Lobby(this.plugin, mapManager, lobbyName, gameMode, maxPlayers, map);
+    public void replaceLobby(String lobbyName, Lobby lobby) {
+      lobbies.put(lobbyName, lobby);
+    }
+
+    public Lobby addLobby(Integer maxPlayers, String lobbyName, GameMap map) {
+      Lobby addedLobby = new WaitingLobby(this.plugin, maxPlayers, mapManager, lobbyName);
       lobbies.put(lobbyName, addedLobby);
       return addedLobby;
     }
@@ -84,8 +93,8 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
       } 
     }
 
-    public String joinLobby(Lobby lobby, Player player) {
-      if (lobby.hasPlayer(player)) {
+    public void joinLobby(Lobby lobby, Player player) {
+      if (lobby.playerInLobby(player)) {
         List<Lobby> oldLobbies = new ArrayList<Lobby>(lobbies.values());
         oldLobbies.remove(lobby);
         for(Lobby oldLobby: oldLobbies) {
@@ -95,8 +104,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
           }
         }
       }
-      String playerJoinMessage = lobby.addPlayer(player);
-      return playerJoinMessage;
+      lobby.addPlayer(player);
     }
 
     public void cleanupLobbies() {
@@ -138,7 +146,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
           switch (args[0]) {
             case "create":
               if (lobbies.get(args[1]) == null) {
-                Lobby createdLobby = addLobby(GameMode.WAITING, 10, args[1], mapManager.getMapByName("WAITING_ROOM"));
+                Lobby createdLobby = addLobby(10, args[1], mapManager.getMapByName("WAITING_ROOM"));
                 sender.sendMessage("[EggSplosion] Lobby " + args[1] + " created!");
                 if (sender instanceof Player) {
                   Player playerCmdSender = (Player) sender;
@@ -154,8 +162,7 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
                 Player playerCmdSender = (Player) sender;
                 Lobby lobby = lobbies.get(args[1]);
                 if (lobby != null) {
-                  String lobbyJoinMessage = joinLobby(lobby, playerCmdSender);
-                  playerCmdSender.sendMessage(lobbyJoinMessage);
+                  joinLobby(lobby, playerCmdSender);
                   return true;
                 }  else {
                   playerCmdSender.sendMessage("[EggSplosion] Lobby " + args[0] + " does not exist");

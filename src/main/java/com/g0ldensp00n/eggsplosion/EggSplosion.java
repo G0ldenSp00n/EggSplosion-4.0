@@ -1,18 +1,17 @@
 package com.g0ldensp00n.eggsplosion;
 
-import com.g0ldensp00n.eggsplosion.handlers.RespawnHandler;
-import com.g0ldensp00n.eggsplosion.handlers.EggExplode;
-import com.g0ldensp00n.eggsplosion.handlers.ExplosionRegen;
-import com.g0ldensp00n.eggsplosion.handlers.Weapon;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyMenuSystem;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameModeListeners;
-import com.g0ldensp00n.eggsplosion.handlers.ArmorRemoveHandler;
-import com.g0ldensp00n.eggsplosion.handlers.DeathMessages;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameModeListeners;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
-import com.g0ldensp00n.eggsplosion.handlers.Food;
-import com.g0ldensp00n.eggsplosion.handlers.PickupDropHandler;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.MapManager;
+import com.g0ldensp00n.eggsplosion.handlers.Core.ArmorRemoveHandler;
+import com.g0ldensp00n.eggsplosion.handlers.Core.DeathMessages;
+import com.g0ldensp00n.eggsplosion.handlers.Core.EggExplode;
+import com.g0ldensp00n.eggsplosion.handlers.Core.ExplosionRegen;
+import com.g0ldensp00n.eggsplosion.handlers.Core.Food;
+import com.g0ldensp00n.eggsplosion.handlers.Core.PickupDropHandler;
+import com.g0ldensp00n.eggsplosion.handlers.Core.RespawnHandler;
+import com.g0ldensp00n.eggsplosion.handlers.Core.Weapon;
+import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameModeListeners;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyMenuSystem;
+import com.g0ldensp00n.eggsplosion.handlers.MapManager.MapManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -30,15 +29,15 @@ public class EggSplosion extends JavaPlugin {
         explosionRegen = new ExplosionRegen(this);
         mapManager = new MapManager(this, pluginFolder);
         lobbyManager = LobbyManager.getInstance(this, mapManager); 
-        DeathMessages deathMessages = new DeathMessages(this, lobbyManager);
-        EggExplode eggExplode = new EggExplode(this);
-        Weapon weapon = new Weapon(this);
-        GameModeListeners gameModeListeners = new GameModeListeners(this, lobbyManager);
-        PickupDropHandler pickupDropHandler = new PickupDropHandler(this, lobbyManager);
-        ArmorRemoveHandler armorRemoveHandler = new ArmorRemoveHandler(this, lobbyManager);
-        RespawnHandler death = new RespawnHandler(this, lobbyManager);
-        LobbyMenuSystem shop = new LobbyMenuSystem(this, lobbyManager, mapManager);
-        Food food = new Food(this);
+        new DeathMessages(this, lobbyManager);
+        new EggExplode(this);
+        new Weapon(this);
+        new GameModeListeners(this, lobbyManager);
+        new PickupDropHandler(this, lobbyManager);
+        new ArmorRemoveHandler(this, lobbyManager);
+        new RespawnHandler(this, lobbyManager);
+        new LobbyMenuSystem(this, lobbyManager, mapManager);
+        new Food(this);
 
         this.getCommand("lobby").setExecutor(lobbyManager);
         this.getCommand("lobby").setTabCompleter(lobbyManager);

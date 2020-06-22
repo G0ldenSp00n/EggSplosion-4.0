@@ -1,4 +1,4 @@
-package com.g0ldensp00n.eggsplosion.handlers;
+package com.g0ldensp00n.eggsplosion.handlers.Core;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,11 +15,11 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.GameMode;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.Lobby;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.LobbyManager;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.ScoreManager;
-import com.g0ldensp00n.eggsplosion.handlers.Lobby.ScoreType;
+import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreManager;
+import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreType;
 
 public class RespawnHandler implements Listener {
   private LobbyManager lobbyManager;
@@ -53,25 +53,25 @@ public class RespawnHandler implements Listener {
           player.setHealth(20);
           Lobby playersLobby = lobbyManager.getPlayersLobby(player);
           Location spawnPoint = null;
-          if (playersLobby != null && playersLobby.getScoreboardManager() != null && playersLobby.getScoreboardManager().getScoreType() == ScoreType.TEAM) {
+          if (playersLobby != null && playersLobby.getScoreManager() != null && playersLobby.getScoreManager().getScoreType() == ScoreType.TEAM) {
             if (playersLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
               if (player.getInventory().getHelmet() != null) {
                 if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
                   if (playersLobby.getMap().getDoFlagMessages()) {
-                    playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
+                    playersLobby.broadcastActionBar(playersLobby.getScoreManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
                   }
-                  playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamB());
+                  playersLobby.getMap().respawnFlag(playersLobby.getScoreManager().getTeamB());
                 } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
                   if (playersLobby.getMap().getDoFlagMessages()) {
-                    playersLobby.broadcastActionBar(playersLobby.getScoreboardManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
+                    playersLobby.broadcastActionBar(playersLobby.getScoreManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
                   }
-                  playersLobby.getMap().respawnFlag(playersLobby.getScoreboardManager().getTeamA());
+                  playersLobby.getMap().respawnFlag(playersLobby.getScoreManager().getTeamA());
                 }
                 playersLobby.equipPlayer(player);
               }
             }
             
-            ScoreManager scoreboardManager = playersLobby.getScoreboardManager();
+            ScoreManager scoreboardManager = playersLobby.getScoreManager();
             if (scoreboardManager.getPlayerTeam(player).equals(scoreboardManager.getTeamA())) {
               spawnPoint = playersLobby.getMap().getSpawnPoint(scoreboardManager.getTeamA());
             } else if (scoreboardManager.getPlayerTeam(player).equals(scoreboardManager.getTeamB())) {

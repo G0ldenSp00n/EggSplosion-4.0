@@ -1,4 +1,4 @@
-package com.g0ldensp00n.eggsplosion.handlers;
+package com.g0ldensp00n.eggsplosion.handlers.Core;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
