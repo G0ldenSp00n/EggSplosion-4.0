@@ -17,6 +17,7 @@ import java.util.*;
 
 import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameLobby;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
 import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreManager;
 import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreType;
@@ -54,21 +55,9 @@ public class RespawnHandler implements Listener {
           Lobby playersLobby = lobbyManager.getPlayersLobby(player);
           Location spawnPoint = null;
           if (playersLobby != null && playersLobby.getScoreManager() != null && playersLobby.getScoreManager().getScoreType() == ScoreType.TEAM) {
-            if (playersLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
-              if (player.getInventory().getHelmet() != null) {
-                if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
-                  if (playersLobby.getMap().getDoFlagMessages()) {
-                    playersLobby.broadcastActionBar(playersLobby.getScoreManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
-                  }
-                  playersLobby.getMap().respawnFlag(playersLobby.getScoreManager().getTeamB());
-                } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
-                  if (playersLobby.getMap().getDoFlagMessages()) {
-                    playersLobby.broadcastActionBar(playersLobby.getScoreManager().getPlayerDisplayName(player) + " has dropped the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
-                  }
-                  playersLobby.getMap().respawnFlag(playersLobby.getScoreManager().getTeamA());
-                }
-                playersLobby.equipPlayer(player);
-              }
+            if (playersLobby instanceof GameLobby) {
+              GameLobby gameLobby = (GameLobby) playersLobby;
+              gameLobby.resetPlayerFlag(player, "has dropped the");
             }
             
             ScoreManager scoreboardManager = playersLobby.getScoreManager();
