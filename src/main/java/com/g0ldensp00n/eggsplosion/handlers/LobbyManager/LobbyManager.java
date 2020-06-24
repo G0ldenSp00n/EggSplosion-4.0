@@ -94,7 +94,9 @@ public class LobbyManager implements Listener, CommandExecutor, TabCompleter {
     }
 
     public void joinLobby(Lobby lobby, Player player) {
-      if (lobby.playerInLobby(player)) {
+      if (getPlayersLobby(player) instanceof MainLobby) {
+        getPlayersLobby(player).removePlayer(player);
+      } else {
         List<Lobby> oldLobbies = new ArrayList<Lobby>(lobbies.values());
         oldLobbies.remove(lobby);
         for(Lobby oldLobby: oldLobbies) {
