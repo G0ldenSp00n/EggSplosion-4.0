@@ -16,6 +16,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -58,7 +59,40 @@ public class GameLobby extends Lobby {
     throw new Error("Can't join an in progress lobby");
   }
 
+
+  public void resetPlayerFlag(Player player, String eventMessage, Boolean addScore) {
+    if (getGameMode().equals(GameMode.CAPTURE_THE_FLAG)) {
+      if (player.getInventory().getHelmet() != null) {
+        if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
+          if (getMap().getDoFlagMessages()) {
+            broadcastActionBar(getScoreManager().getPlayerDisplayName(player)  + " " + eventMessage + " " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
+          }
+          getMap().respawnFlag(getScoreManager().getTeamB());
+          if (addScore) {
+            getScoreManager().addScorePlayer(player);
+          }
+          equipPlayer(player);
+        } else if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
+          if (getMap().getDoFlagMessages()) {
+            broadcastActionBar(getScoreManager().getPlayerDisplayName(player) + " " + eventMessage + " " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
+          }
+          getMap().respawnFlag(getScoreManager().getTeamA());
+          if (addScore) {
+            getScoreManager().addScorePlayer(player);
+          }
+          equipPlayer(player);
+        }
+      }
+    }
+  }
+
+  public void resetPlayerFlag(Player player, String eventMessage) {
+    resetPlayerFlag(player, eventMessage, false);
+  }
+
+
   protected void handlePlayerLeave(Player player) {
+    resetPlayerFlag(player, "has dropped the");
     return;
   }
 

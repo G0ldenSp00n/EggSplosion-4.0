@@ -1,6 +1,7 @@
 package com.g0ldensp00n.eggsplosion.handlers.GameModeManager;
 
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameLobby;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
 import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreManager;
 
@@ -69,32 +70,9 @@ public class GameModeListeners implements Listener {
   public void playerMoveEvent(PlayerMoveEvent playerMoveEvent) {
     Player player = playerMoveEvent.getPlayer();
     Lobby playerLobby = lobbyManager.getPlayersLobby(player);
-    if (playerLobby != null && playerLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
-      if (player.getInventory().getHelmet() != null) {
-        if (player.getInventory().getHelmet().getType().equals(Material.RED_BANNER)) {
-          Location playerFlagLocation = playerLobby.getMap().getSideFlagLocation(playerLobby.getMap().getTeamSide(playerLobby.getScoreManager().getTeamB()));
-          playerFlagLocation.add(0, 1, 0);
-          if (player.getLocation().distance(playerFlagLocation) < 5 && playerFlagLocation.getBlock().getType().equals(Material.BLUE_BANNER)) {
-            playerLobby.equipPlayer(player);
-            if (playerLobby.getMap().getDoFlagMessages()) {
-              playerLobby.broadcastActionBar(playerLobby.getScoreManager().getPlayerDisplayName(player) + " has captured the " + ChatColor.RED + "Red Team" + ChatColor.RESET + " Flag", true);
-            }
-            playerLobby.getMap().respawnFlag(playerLobby.getScoreManager().getTeamA());
-            playerLobby.getScoreManager().addScorePlayer(player);
-          }
-        } else if (player.getInventory().getHelmet().getType().equals(Material.BLUE_BANNER)) {
-          Location playerFlagLocation = playerLobby.getMap().getSideFlagLocation(playerLobby.getMap().getTeamSide(playerLobby.getScoreManager().getTeamA()));
-          playerFlagLocation.add(0, 1, 0);
-          if (player.getLocation().distance(playerFlagLocation) < 5 && playerFlagLocation.getBlock().getType().equals(Material.RED_BANNER)) {
-            playerLobby.equipPlayer(player);
-            if (playerLobby.getMap().getDoFlagMessages()) {
-              playerLobby.broadcastActionBar(playerLobby.getScoreManager().getPlayerDisplayName(player) + " has captured the " + ChatColor.BLUE + "Blue Team" + ChatColor.RESET + " Flag", true);
-            }
-            playerLobby.getMap().respawnFlag(playerLobby.getScoreManager().getTeamB());
-            playerLobby.getScoreManager().addScorePlayer(player);
-          }
-        }
-      }
+    if (playerLobby instanceof GameLobby) {
+      GameLobby gameLobby = (GameLobby) playerLobby;
+      gameLobby.resetPlayerFlag(player, "has captured the", true);
     }
   }
 }
