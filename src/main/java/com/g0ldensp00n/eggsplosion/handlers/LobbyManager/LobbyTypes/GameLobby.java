@@ -93,7 +93,6 @@ public class GameLobby extends Lobby {
 
   protected void handlePlayerLeave(Player player) {
     resetPlayerFlag(player, "has dropped the");
-    return;
   }
 
   protected void handleMapChange(GameMap gameMap) {

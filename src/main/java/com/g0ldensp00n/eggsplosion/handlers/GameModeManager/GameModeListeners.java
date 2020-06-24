@@ -65,6 +65,17 @@ public class GameModeListeners implements Listener {
     }
   }
 
+  public void handleFlagCaptureLogic(Player player, GameLobby gameLobby) {
+    if (gameLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
+      if (player.getInventory().getHelmet() != null) {
+        Location playerFlagLocation = gameLobby.getMap().getSideFlagLocation(gameLobby.getMap().getTeamSide(gameLobby.getScoreManager().getTeamB()));
+        playerFlagLocation.add(0, 1, 0);
+        if (player.getLocation().distance(playerFlagLocation) < 5) {
+          gameLobby.resetPlayerFlag(player, "has captured the", true);
+        }
+      }
+    }
+  }
 
   @EventHandler
   public void playerMoveEvent(PlayerMoveEvent playerMoveEvent) {
@@ -72,7 +83,8 @@ public class GameModeListeners implements Listener {
     Lobby playerLobby = lobbyManager.getPlayersLobby(player);
     if (playerLobby instanceof GameLobby) {
       GameLobby gameLobby = (GameLobby) playerLobby;
-      gameLobby.resetPlayerFlag(player, "has captured the", true);
+
+      handleFlagCaptureLogic(player, gameLobby);
     }
   }
 }
