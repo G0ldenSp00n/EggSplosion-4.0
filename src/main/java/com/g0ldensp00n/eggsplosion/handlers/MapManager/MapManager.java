@@ -113,6 +113,16 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
         if (mapConfigFile.getInt("pointsToWinCTF") != 0) {
           map.setPointsToWinCTF(mapConfigFile.getInt("pointsToWinCTF"));
         }
+
+        List<String> capturePointNames = mapConfigFile.getStringList("capturePointNames");
+        if (capturePointNames.size() > 0) {
+          for (String capturePointName : capturePointNames) {
+            Location capturePointLocation = mapConfigFile.getLocation("capturePoint"+capturePointName);
+            if (capturePointLocation != null) {
+              map.addCapturePoint(capturePointName, capturePointLocation);
+            }
+          }
+        }
         
         if (mapConfigFile.getInt("pointsToWinTDM") != 0) {
           map.setPointsToWinTDM(mapConfigFile.getInt("pointsToWinTDM"));
@@ -270,6 +280,17 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
 
         if (map.getBoots() != null) {
           mapConfigFile.set("boots", map.getBoots());
+        }
+
+        List<String> capturePointNames = map.getAllCapturePointName();
+        if (capturePointNames.size() > 0) {
+          mapConfigFile.set("capturePointNames", capturePointNames);
+          for (String capturePointName : capturePointNames) {
+            Location capturePointLocation = map.getCapturePoint(capturePointName);
+            if (capturePointLocation != null) {
+              mapConfigFile.set("capturePoint"+capturePointName, capturePointLocation);
+            }
+          }
         }
 
         try {
@@ -794,7 +815,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               }
             }
             break;
-          case "icon":
+          case "icon": {
             GameMap map = gameMaps.get(args[1]);
             if (map != null) {
               if (sender instanceof Player) {
@@ -804,6 +825,52 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                   player.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Icon Set to: " + ChatColor.DARK_GRAY + player.getInventory().getItemInMainHand().getType().name().toLowerCase());
                 } else {
                   player.sendMessage("[EggSplosion] Hold an item in your hand to set it as the map icon");
+                }
+                return true;
+              }
+            }
+            break;
+          }
+          case "capturepoint":
+            GameMap map = gameMaps.get(args[1]);
+            if (map != null) {
+              if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (args.length >= 4) {
+                  switch (args[2]) {
+                    case "add":
+                      Location playerLocation = player.getLocation();
+                      if (!map.locationInMap(playerLocation)) {
+                        player.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " point not inside map, move into map to add capture point");
+                        return true;
+                      }
+                      map.addCapturePoint(args[3], playerLocation);
+                      player.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Added Capture Point " + ChatColor.GREEN + args[3] + ChatColor.RESET + " (" + playerLocation.getBlockX() + ", " + playerLocation.getBlockY() + ", " + playerLocation.getBlockZ() + ")");
+                      break;
+                    case "remove":
+                      Location capturePointLocation = map.getCapturePoint(args[3]);
+                      map.removeCapturePoint(args[3]);
+                      player.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Removed Capture Point " + ChatColor.GREEN + args[3] + ChatColor.RESET + " (" + capturePointLocation.getBlockX() + ", " + capturePointLocation.getBlockY() + ", " + capturePointLocation.getBlockZ() + ")");
+                      break;
+                  }
+                } else if (args.length == 3) {
+                  sender.sendMessage("[EggSplosion] Capture Point Name Unspecified /map capturepoint <mapName> <add|remove> <capturePointName>");
+                } else if (args.length == 2) {
+                  Iterator<String> capturePointNames = map.getAllCapturePointName().iterator();
+                  String formattedString = "";
+                  while (capturePointNames.hasNext()) {
+                    String capturePointName = capturePointNames.next();
+                    formattedString += ChatColor.GREEN + capturePointName + ChatColor.RESET;
+                    if (capturePointNames.hasNext()) {
+                      formattedString += ", ";
+                    }
+                  }
+
+                  if (formattedString != "") {
+                    sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " Capture Points: " + formattedString);
+                  } else {
+                    sender.sendMessage("[EggSplosion] Map " + ChatColor.AQUA + args[1] + ChatColor.RESET + " has no capture points! Create one with /map capturepoint add <capturePointName>");
+                  }
                 }
                 return true;
               }
@@ -827,6 +894,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
           commands.add("effect");
           commands.add("loadout");
           commands.add("icon");
+          commands.add("capturepoint");
           return Utils.FilterTabComplete(args[0], commands);         
         case 2:
           switch(args[0]) {
@@ -836,6 +904,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
             case "effect":
             case "loadout":
             case "icon":
+            case "capturepoint":
               List<String> mapNames = new ArrayList<>();
               Iterator<String> mapNamesIterator = gameMaps.keySet().iterator();
               while (mapNamesIterator.hasNext()) {
@@ -864,6 +933,7 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
               gameRules.add("flagSpawnDelay");
               return Utils.FilterTabComplete(args[2], gameRules);
             case "effect":
+            case "capturepoint":
               List<String> effectCommands = new ArrayList<>();
               effectCommands.add("add");
               effectCommands.add("remove");
@@ -912,6 +982,8 @@ public class MapManager implements Listener, CommandExecutor, TabCompleter {
                   }
                   return Utils.FilterTabComplete(args[3], mapPotionTypes);
               }
+            default:
+              return new ArrayList<>();
           }
         case 5:
           return new ArrayList<>();

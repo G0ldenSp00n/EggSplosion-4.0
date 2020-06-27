@@ -116,6 +116,12 @@ public class GameLobby extends Lobby {
         randomizeTeams();
         getMap().randomizeTeamSides(scoreManager.getTeams());
         break;
+      case CAPTURE_POINT:
+        setScoreManager(new ScoreManager(getMap().getPointsToWinCTF(), ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
+        randomizeTeams();
+        getMap().randomizeTeamSides(scoreManager.getTeams());
+        getMap().spawnCapturePoints();
+        break;
       case CAPTURE_THE_FLAG:
         setScoreManager(new ScoreManager(getMap().getPointsToWinCTF(), ScoreType.TEAM, this, ChatColor.RED, ChatColor.BLUE, true));
         randomizeTeams();

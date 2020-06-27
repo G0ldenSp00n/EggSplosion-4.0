@@ -43,6 +43,7 @@ public class LobbyMenuSystem implements Listener {
     private ItemStack UI_Button_mapSelect;
     private ItemStack UI_Button_ctfGameMode;
     private ItemStack UI_Button_tdmGameMode;
+    private ItemStack UI_Button_cpGameMode;
     private ItemStack UI_Button_dmGameMode;
     private LobbyManager lobbyManager;
     private MapManager mapManager;
@@ -59,6 +60,7 @@ public class LobbyMenuSystem implements Listener {
       UI_Button_ctfGameMode = createMenuButton(Material.BLUE_BANNER, "Capture the Flag");
       UI_Button_tdmGameMode = createMenuButton(Material.LEATHER_CHESTPLATE, "Team Death Match");
       UI_Button_dmGameMode = createMenuButton(Material.LEATHER_HELMET, "Death Match");
+      UI_Button_cpGameMode = createMenuButton(Material.BEACON, "Capture Point");
 
       //Configure TDM Button
       LeatherArmorMeta tdmMeta = (LeatherArmorMeta) UI_Button_tdmGameMode.getItemMeta();
@@ -66,8 +68,9 @@ public class LobbyMenuSystem implements Listener {
       UI_Button_tdmGameMode.setItemMeta(tdmMeta);
 
       Screen_gameModeSelect.setItem(12, UI_Button_ctfGameMode);
-      Screen_gameModeSelect.setItem(13, UI_Button_dmGameMode);
+      Screen_gameModeSelect.setItem(13, UI_Button_cpGameMode);
       Screen_gameModeSelect.setItem(14, UI_Button_tdmGameMode);
+      Screen_gameModeSelect.setItem(22, UI_Button_dmGameMode);
 
       // Map Select Screen
       Screen_mapSelect = Bukkit.getServer().createInventory(null, InventoryType.CHEST, "Map Select Menu");
@@ -181,6 +184,9 @@ public class LobbyMenuSystem implements Listener {
           } else if (clickedItem.equals(UI_Button_dmGameMode)) {
             player.closeInventory();
             waitingLobby.registerGameModeVote(GameMode.DEATH_MATCH, player);
+          } else if (clickedItem.equals(UI_Button_cpGameMode)) {
+            player.closeInventory();
+            waitingLobby.registerGameModeVote(GameMode.CAPTURE_POINT, player);
           } else if (inventoryClickEvent.getSlot() == 22) {
             waitingLobby.togglePlayerReady(player);
             ItemStack UI_Button_ReadyUnready;

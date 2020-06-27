@@ -5,6 +5,6 @@ public enum GameMode {
   DEATH_MATCH,
   TEAM_DEATH_MATCH,
   CAPTURE_THE_FLAG,
-  HARD_POINT,
+  CAPTURE_POINT,
   WAITING
 };

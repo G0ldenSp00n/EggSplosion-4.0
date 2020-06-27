@@ -29,6 +29,7 @@ public class GameMap {
   private Map<Integer, List<Location>> sideSpawnLocations;
   private List<GameMode> supportedGameModes;
   private Map<Integer, Location> sideFlagLocation;
+  private Map<String, Location> capturePointLocations;
   private Map<Team, Integer> teamSide;
   private List<PotionEffect> mapEffects;
   private Inventory playerLoadout;
@@ -64,6 +65,7 @@ public class GameMap {
     sideSpawnLocations.put(0, new ArrayList<Location>());
     sideSpawnLocations.put(1, new ArrayList<Location>());
     sideFlagLocation = new Hashtable<Integer, Location>();
+    capturePointLocations = new Hashtable<String, Location>();
 
     supportedGameModes = new ArrayList<GameMode>();
     mapEffects = new ArrayList<PotionEffect>();
@@ -95,6 +97,30 @@ public class GameMap {
 
   public Inventory getLoadout() {
     return playerLoadout;
+  }
+
+  public void addCapturePoint(String pointName, Location location) {
+    capturePointLocations.put(pointName, location);
+  }
+
+  public void removeCapturePoint(String pointName) {
+    capturePointLocations.remove(pointName);
+  }
+
+  public List<String> getAllCapturePointName() {
+    List<String> capturePointNames = new ArrayList<>();
+    for(String capturePointName : capturePointLocations.keySet()) {
+      capturePointNames.add(capturePointName);
+    }
+
+    return capturePointNames;
+  }
+
+  public Location getCapturePoint(String pointName) {
+    if (capturePointLocations.get(pointName) != null) {
+      return capturePointLocations.get(pointName).clone();
+    }
+    return null;
   }
 
   public void setLoadoutContents (ItemStack[] playerLoadoutContents) {
@@ -351,6 +377,19 @@ public class GameMap {
     teamFlag.setType(Material.AIR);
     teamFlagBaseBlock.setType(Material.OBSIDIAN);
     teamFlag.setType(flagType);
+  }
+
+  public void spawnCapturePoints() {
+    for (String capturePointName : getAllCapturePointName()) {
+      Location beaconLocation = getCapturePoint(capturePointName);
+      beaconLocation.getBlock().setType(Material.BEACON);
+      for (Integer baseXOffset = 0; baseXOffset < 3; baseXOffset++) {
+        for (Integer baseZOffset = 0; baseZOffset < 3; baseZOffset++) {
+          Location baseBlockLocation = beaconLocation.clone().add(-1 + baseXOffset, -1, -1 + baseZOffset);
+          baseBlockLocation.getBlock().setType(Material.IRON_BLOCK);
+        }
+      }
+    }
   }
 
   public void clearFlag(Integer side) {

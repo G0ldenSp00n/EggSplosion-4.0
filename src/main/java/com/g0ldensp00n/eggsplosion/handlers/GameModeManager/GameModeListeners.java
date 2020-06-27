@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Beacon;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,6 +19,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class GameModeListeners implements Listener {
   private LobbyManager lobbyManager;
@@ -68,10 +72,21 @@ public class GameModeListeners implements Listener {
   public void handleFlagCaptureLogic(Player player, GameLobby gameLobby) {
     if (gameLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
       if (player.getInventory().getHelmet() != null) {
-        Location playerFlagLocation = gameLobby.getMap().getSideFlagLocation(gameLobby.getMap().getTeamSide(gameLobby.getScoreManager().getTeamB()));
+        Location playerFlagLocation = gameLobby.getMap().getSideFlagLocation(gameLobby.getMap().getTeamSide(gameLobby.getScoreManager().getPlayerTeam(player)));
         playerFlagLocation.add(0, 1, 0);
         if (player.getLocation().distance(playerFlagLocation) < 5) {
           gameLobby.resetPlayerFlag(player, "has captured the", true);
+        }
+      }
+    }
+  }
+
+  public void handleCapturPointLogic(Player player, GameLobby gameLobby) {
+    if (gameLobby.getGameMode() == GameMode.CAPTURE_POINT) {
+      Location playerLocation = player.getLocation();
+      for (String capturePointName : gameLobby.getMap().getAllCapturePointName()) {
+        if(gameLobby.getMap().getCapturePoint(capturePointName).distance(playerLocation) < 5) {
+          player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Capturing Point " + ChatColor.GREEN + capturePointName));
         }
       }
     }
@@ -85,6 +100,8 @@ public class GameModeListeners implements Listener {
       GameLobby gameLobby = (GameLobby) playerLobby;
 
       handleFlagCaptureLogic(player, gameLobby);
+
+      handleCapturPointLogic(player, gameLobby);
     }
   }
 }

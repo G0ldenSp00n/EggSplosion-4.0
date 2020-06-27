@@ -340,6 +340,8 @@ public abstract class Lobby {
         return "Death Match";
       case LOBBY:
         return "Lobby";
+      case CAPTURE_POINT:
+        return "Capture Point";
       default:
         return "";
     }
