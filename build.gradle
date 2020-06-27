@@ -10,7 +10,7 @@ version "4.0"
 // Override default configurations
 bukkit {
     // Version of API (if you will not set this property, will be used latest available)
-    version = "1.15.2"
+    version = "1.16.1"
  
     // Attributes for plugin.yml
     meta {
@@ -22,6 +22,7 @@ bukkit {
     }
 
     run {
+      core = "spigot"
       eula = true
       debug = false
       onlineMode = true
@@ -35,6 +36,5 @@ repositories {
 // Let's add needed API to project
 dependencies {
     compileOnly spigotApi()
-    compileOnly spigot()
     // see section 'Dependencies' for more info
 }
