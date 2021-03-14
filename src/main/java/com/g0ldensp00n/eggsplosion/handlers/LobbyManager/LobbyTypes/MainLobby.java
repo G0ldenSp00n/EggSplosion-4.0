@@ -10,7 +10,6 @@ import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -85,9 +84,5 @@ public class MainLobby extends Lobby {
 
   protected void handleMapChange(GameMap gameMap) {
     throw new Error("Main Lobby can't have a map");
-  }
-
-  protected void handleGameModeChange(GameMode gameMode) {
-    throw new Error("Main Lobby can't have a gamemode");
   }
 }

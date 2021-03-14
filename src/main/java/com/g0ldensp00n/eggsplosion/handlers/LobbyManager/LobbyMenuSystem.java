@@ -199,7 +199,7 @@ public class LobbyMenuSystem implements Listener {
           }
 
           if (inventoryClickEvent.getInventory().equals(Screen_mapSelect)) {
-            String mapName = clickedItem.getItemMeta().getDisplayName().substring(2);
+            String mapName = clickedItem.getItemMeta().getDisplayName();
             player.closeInventory();
             waitingLobby.registerMapVote(mapName, player);
           }

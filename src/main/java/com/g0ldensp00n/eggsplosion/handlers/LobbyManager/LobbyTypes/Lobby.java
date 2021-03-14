@@ -66,7 +66,6 @@ public abstract class Lobby {
   protected abstract void handlePlayerLeave(Player player);
   protected abstract void handleScoreManagerChange(Player player, ScoreManager scoreManager);
   protected abstract void handleMapChange(GameMap gameMap);
-  protected abstract void handleGameModeChange(GameMode gameMode);
 
   public void applyMapEffects() {
     new BukkitRunnable(){
@@ -158,13 +157,6 @@ public abstract class Lobby {
   }
 
   public void setGameMode(GameMode gameMode) {
-    try {
-      handleGameModeChange(gameMode);
-    } catch (Error error) {
-      error.printStackTrace();
-      return;
-    }
-
     this.gameMode = gameMode;
   }
 

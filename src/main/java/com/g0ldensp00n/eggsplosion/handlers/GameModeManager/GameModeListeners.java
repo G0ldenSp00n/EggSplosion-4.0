@@ -1,15 +1,16 @@
 package com.g0ldensp00n.eggsplosion.handlers.GameModeManager;
 
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
-import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameLobby;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_CapturePoint;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_CaptureTheFlag;
 import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreManager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Beacon;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -70,23 +71,27 @@ public class GameModeListeners implements Listener {
   }
 
   public void handleFlagCaptureLogic(Player player, GameLobby gameLobby) {
-    if (gameLobby.getGameMode() == GameMode.CAPTURE_THE_FLAG) {
+    if (gameLobby instanceof GameLobby_CaptureTheFlag) {
+      GameLobby_CaptureTheFlag ctfLobby = (GameLobby_CaptureTheFlag) gameLobby;
       if (player.getInventory().getHelmet() != null) {
         Location playerFlagLocation = gameLobby.getMap().getSideFlagLocation(gameLobby.getMap().getTeamSide(gameLobby.getScoreManager().getPlayerTeam(player)));
         playerFlagLocation.add(0, 1, 0);
         if (player.getLocation().distance(playerFlagLocation) < 5) {
-          gameLobby.resetPlayerFlag(player, "has captured the", true);
+          ctfLobby.resetPlayerFlag(player, "has captured the", true);
         }
       }
     }
   }
 
-  public void handleCapturPointLogic(Player player, GameLobby gameLobby) {
-    if (gameLobby.getGameMode() == GameMode.CAPTURE_POINT) {
+  public void handleCapturePointLogic(Player player, GameLobby gameLobby) {
+    if (gameLobby instanceof GameLobby_CapturePoint) {
+      GameLobby_CapturePoint cpLobby = (GameLobby_CapturePoint) gameLobby;
       Location playerLocation = player.getLocation();
       for (String capturePointName : gameLobby.getMap().getAllCapturePointName()) {
         if(gameLobby.getMap().getCapturePoint(capturePointName).distance(playerLocation) < 5) {
-          player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent("Capturing Point " + ChatColor.GREEN + capturePointName));
+          cpLobby.playerCapturingPoint(capturePointName, player);
+        } else {
+          cpLobby.playerStopCapturingPoint(capturePointName, player);
         }
       }
     }
@@ -101,7 +106,7 @@ public class GameModeListeners implements Listener {
 
       handleFlagCaptureLogic(player, gameLobby);
 
-      handleCapturPointLogic(player, gameLobby);
+      handleCapturePointLogic(player, gameLobby);
     }
   }
 }

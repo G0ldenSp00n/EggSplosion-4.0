@@ -8,6 +8,11 @@ import java.util.Random;
 
 import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_CapturePoint;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_CaptureTheFlag;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_DeathMatch;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_TeamDeathMatch;
 import com.g0ldensp00n.eggsplosion.handlers.MapManager.GameMap;
 import com.g0ldensp00n.eggsplosion.handlers.MapManager.MapManager;
 import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreManager;
@@ -64,12 +69,6 @@ public class WaitingLobby extends Lobby {
 
   protected void handleMapChange(GameMap gameMap) {
     return;
-  }
-
-  protected void handleGameModeChange(GameMode gameMode) {
-    if (gameMode != GameMode.WAITING) {
-      throw new Error("Waiting Room can't have game mode changed");
-    }
   }
 
   protected void handleScoreManagerChange(Player player, ScoreManager scoreManager) {
@@ -132,8 +131,27 @@ public class WaitingLobby extends Lobby {
 
               // Setup Game Mode Lobby
               removeAllPlayers();
-              GameLobby gameLobby = new GameLobby(plugin, mapManager, getLobbyName(), gameMode, gameMap, playersToMove);
-              LobbyManager.getInstance(plugin, mapManager).replaceLobby(getLobbyName(), gameLobby);
+              GameLobby gameLobby = null;
+              switch (gameMode) {
+                case TEAM_DEATH_MATCH:
+                  gameLobby = (GameLobby) new GameLobby_TeamDeathMatch(plugin, mapManager, getLobbyName(), gameMap, playersToMove);
+                  break;
+                case CAPTURE_THE_FLAG:
+                  gameLobby = (GameLobby) new GameLobby_CaptureTheFlag(plugin, mapManager, getLobbyName(), gameMap, playersToMove);
+                  break;
+                case DEATH_MATCH:
+                  gameLobby = (GameLobby) new GameLobby_DeathMatch(plugin, mapManager, getLobbyName(), gameMap, playersToMove);
+                  break;
+                case CAPTURE_POINT:
+                  gameLobby = (GameLobby) new GameLobby_CapturePoint(plugin, mapManager, getLobbyName(), gameMap, playersToMove);
+                  break;
+                default:
+                  broadcastMessage("Unsupported Gamemode Selected");
+                  break;
+              }
+              if (gameLobby != null) {
+                LobbyManager.getInstance(plugin, mapManager).replaceLobby(getLobbyName(), gameLobby);
+              }
               return;
             } if (allPlayersReady()) {
               broadcastTitle("Game Starting", ""+countDown--, 0, 21, 0);

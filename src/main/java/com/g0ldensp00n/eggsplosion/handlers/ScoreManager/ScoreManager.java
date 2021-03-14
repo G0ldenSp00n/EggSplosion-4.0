@@ -3,8 +3,8 @@ package com.g0ldensp00n.eggsplosion.handlers.ScoreManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameLobby;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -131,7 +131,6 @@ public class ScoreManager {
   }
 
   public void addScorePlayer(Player player) {
-    Boolean shouldRotate = false;
     if (lobby.playerInLobby(player) && !scoreFrozen) {
       Integer newScore = 0;
       switch(scoreType) {
@@ -139,30 +138,46 @@ public class ScoreManager {
           Score playerScore = scoreObjective.getScore(player.getName());
           newScore = playerScore.getScore() + 1;
           playerScore.setScore(newScore);
+
+          if (lobby instanceof GameLobby) {
+            GameLobby gameLobby = (GameLobby) lobby;
+            if (scoreToWin != -1 && (newScore >= scoreToWin)) {
+              gameLobby.playerWon(player);
+            }
+          }
           break;
         case TEAM:
           Team playerTeam = scoreboard.getEntryTeam(player.getName());
-          Score teamScore = scoreObjective.getScore(playerTeam.getDisplayName());
-
-          if (teamScore.getScore() + 1 == (scoreToWin/2) && scoreObjective.getScore(getTeamA().getDisplayName()).getScore() < (scoreToWin/2) && scoreObjective.getScore(getTeamB().getDisplayName()).getScore() < (scoreToWin/2)) {
-            shouldRotate = true;
-          }
-
-          newScore = teamScore.getScore() + 1;
-          teamScore.setScore(newScore);
-
-
+          addScoreTeam(playerTeam);
           break;
         case INFO:
           break;
         case TRACKING:
           break;
       }
+    }
+  }
+
+  public Boolean isFrozen() {
+    return scoreFrozen;
+  }
+
+  public void addScoreTeam(Team team) {
+    if (!scoreFrozen) {
+      Score teamScore = scoreObjective.getScore(team.getDisplayName());
+      Boolean shouldRotate = false;
+
+      if (teamScore.getScore() + 1 == (scoreToWin/2) && scoreObjective.getScore(getTeamA().getDisplayName()).getScore() < (scoreToWin/2) && scoreObjective.getScore(getTeamB().getDisplayName()).getScore() < (scoreToWin/2)) {
+        shouldRotate = true;
+      }
+
+      Integer newScore = teamScore.getScore() + 1;
+      teamScore.setScore(newScore);
 
       if (lobby instanceof GameLobby) {
         GameLobby gameLobby = (GameLobby) lobby;
         if (scoreToWin != -1 && (newScore >= scoreToWin)) {
-          gameLobby.playerWon(player);
+          gameLobby.teamWon(team);
         } else if (scoreToWin != -1 && shouldRotate) {
           gameLobby.rotateSides();
         }

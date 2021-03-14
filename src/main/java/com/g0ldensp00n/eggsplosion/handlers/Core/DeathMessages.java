@@ -7,6 +7,8 @@ import java.util.Random;
 import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_DeathMatch;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_TeamDeathMatch;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -48,7 +50,7 @@ public class DeathMessages implements Listener {
           if ((player.getHealth() - entityDamageEvent.getFinalDamage()) <= 0) {
             damager.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
             Lobby damagerLobby = lobbyManager.getPlayersLobby(damager);
-            if (damagerLobby.getGameMode() == GameMode.DEATH_MATCH || damagerLobby.getGameMode() == GameMode.TEAM_DEATH_MATCH) {
+            if (damagerLobby instanceof GameLobby_DeathMatch || damagerLobby instanceof GameLobby_TeamDeathMatch) {
               damagerLobby.getScoreManager().addScorePlayer(damager);
             }
 

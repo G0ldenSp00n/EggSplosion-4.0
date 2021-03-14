@@ -1,8 +1,6 @@
 package com.g0ldensp00n.eggsplosion.handlers.Core;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -15,10 +13,9 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
-import com.g0ldensp00n.eggsplosion.handlers.GameModeManager.GameMode;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyManager;
-import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameLobby;
 import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.Lobby;
+import com.g0ldensp00n.eggsplosion.handlers.LobbyManager.LobbyTypes.GameModeLobbyTypes.GameLobby_CaptureTheFlag;
 import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreManager;
 import com.g0ldensp00n.eggsplosion.handlers.ScoreManager.ScoreType;
 
@@ -55,8 +52,8 @@ public class RespawnHandler implements Listener {
           Lobby playersLobby = lobbyManager.getPlayersLobby(player);
           Location spawnPoint = null;
           if (playersLobby != null && playersLobby.getScoreManager() != null && playersLobby.getScoreManager().getScoreType() == ScoreType.TEAM) {
-            if (playersLobby instanceof GameLobby) {
-              GameLobby gameLobby = (GameLobby) playersLobby;
+            if (playersLobby instanceof GameLobby_CaptureTheFlag) {
+              GameLobby_CaptureTheFlag gameLobby = (GameLobby_CaptureTheFlag) playersLobby;
               gameLobby.resetPlayerFlag(player, "has dropped the");
             }
             

@@ -62,32 +62,34 @@ public class ExplosionRegen implements Listener {
         block.setType(material);
         block.setBlockData(blockData);
         try {
-          Block blockBelow = location.clone().add(0, -1, 0).getBlock();
-          if (blockBelow.getType() != material) {
-            Bisected testBisected = (Bisected) blockData;
-            Stairs testStair = null;
-            try {
-              testStair = (Stairs) blockData;
-            } catch (ClassCastException e) {
-            }
-            if (testBisected.getHalf() != null && testStair == null) {
-              if (!blockBelow.getType().isSolid()) {
-                blockBelow.setType(Material.GRASS_BLOCK);
+          if (material != Material.OAK_TRAPDOOR) {
+            Block blockBelow = location.clone().add(0, -1, 0).getBlock();
+            if (blockBelow.getType() != material) {
+              Bisected testBisected = (Bisected) blockData;
+              Stairs testStair = null;
+              try {
+                testStair = (Stairs) blockData;
+              } catch (ClassCastException e) {
               }
+              if (testBisected.getHalf() != null && testStair == null) {
+                if (!blockBelow.getType().isSolid()) {
+                  blockBelow.setType(Material.GRASS_BLOCK);
+                }
 
-              // Upper Block
-              Block upperBlock = location.clone().add(0, 1, 0).getBlock();
-              upperBlock.setType(material, false);
+                // Upper Block
+                Block upperBlock = location.clone().add(0, 1, 0).getBlock();
+                upperBlock.setType(material, false);
 
-              //Lower Block
-              BlockData lowerBlockData = block.getBlockData();
-              ((Bisected) lowerBlockData).setHalf(Bisected.Half.BOTTOM);
-              block.setBlockData(lowerBlockData);
+                //Lower Block
+                BlockData lowerBlockData = block.getBlockData();
+                ((Bisected) lowerBlockData).setHalf(Bisected.Half.BOTTOM);
+                block.setBlockData(lowerBlockData);
 
-              //Upper Block
-              Bisected upperBlockData = (Bisected) upperBlock.getBlockData();
-              upperBlockData.setHalf(Bisected.Half.TOP);
-              upperBlock.setBlockData((BlockData) upperBlockData);
+                //Upper Block
+                Bisected upperBlockData = (Bisected) upperBlock.getBlockData();
+                upperBlockData.setHalf(Bisected.Half.TOP);
+                upperBlock.setBlockData((BlockData) upperBlockData);
+              }
             }
           }
         } catch (ClassCastException e) {
